@@ -161,6 +161,22 @@ async function loadThreads() {
   box.textContent = '';
   const pend = THREADS.reduce((s, t) => s + t.pending_count, 0);
   $('#sub').textContent = `${THREADS.length} وكلاء يعملون عندك · ${pend} بانتظار قرارك`;
+  const pill = $('#pend-pill');
+  pill.textContent = pend > 0 ? `⏳ ${pend} بانتظار قرارك` : '✅ لا معلّق اليوم';
+  pill.onclick = () => openThread('head_of_ops');
+  const row = $('#agent-row');
+  row.textContent = '';
+  for (const t of THREADS) {
+    const cell = el('button', 'agent-cell');
+    cell.title = t.name;
+    const orb = el('span', 'agent-orb ' + t.grad, t.emoji);
+    const unread = t.last_id - (READ[t.id] || 0);
+    if (unread > 0 && t.id !== CUR) orb.append(el('span', 'badge', String(unread)));
+    if (t.revoked_at) orb.classList.add('off');
+    cell.append(orb, el('span', 'agent-name', t.name));
+    cell.onclick = () => openThread(t.id);
+    row.append(cell);
+  }
   for (const t of THREADS) {
     const row = el('div', 't-row' + (t.revoked_at ? ' revoked' : ''));
     row.setAttribute('role', 'listitem');
@@ -442,11 +458,16 @@ const CHIPS = {
   marketing: ['القمع', 'ما المعلّق؟'],
   lead_nurturer: ['الردود', 'ما المعلّق؟'],
 };
+const CHIP_ICON = {
+  'شغّل الوكلاء': '🚀', 'الملخص': '🌅', 'ما المعلّق؟': '⏳', 'السجل': '📜',
+  'مساعدة': '❔', 'المطابقة': '💰', 'مستند T-1': '🧾', 'مستند T-2': '🧾',
+  'القمع': '📣', 'الردود': '💬',
+};
 function chips() {
   const box = $('#chips');
   box.textContent = '';
   for (const c of (CHIPS[CUR] || [])) {
-    const b = el('button', null, c);
+    const b = el('button', null, (CHIP_ICON[c] || '•') + ' ' + c);
     b.onclick = () => send(c);
     box.append(b);
   }

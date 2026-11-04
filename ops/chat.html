@@ -14,18 +14,25 @@
   <!-- ══ جهات الاتصال ══ -->
   <aside id="pane-threads">
     <header class="grad">
-      <div class="me">
-        <span class="avatar founder">أ</span>
-        <div>
-          <h1>مركز العمليات</h1>
-          <p id="sub">…</p>
+      <div class="grad-top">
+        <div class="me">
+          <span class="avatar founder">أ</span>
+          <div>
+            <h1>مركز العمليات</h1>
+            <p id="sub" class="sub-pill">…</p>
+          </div>
+        </div>
+        <div class="head-acts">
+          <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع">🌙</button>
+          <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
         </div>
       </div>
-      <div class="head-acts">
-        <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع">🌙</button>
-        <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
-      </div>
+      <div id="agent-row" class="agent-row" aria-label="وكلاؤك"></div>
     </header>
+    <div class="sec-head">
+      <b>💬 المحادثات</b>
+      <button id="pend-pill" class="sec-pill" title="افتح محادثة رئيس العمليات">…</button>
+    </div>
     <div id="threads" role="list"></div>
     <footer class="foot-note">
       كل رسالة هنا مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول</a>
