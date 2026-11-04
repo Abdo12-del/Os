@@ -482,6 +482,69 @@ def main():
           bool(items) and 'فرط' in (items[0].get('matched') or []),
           str(items[0].get('matched') if items else None)[:40])
 
+    # ── ١٧) الإنترنت — بحث مجاني بالكامل: ddgs بلا مفتاح، ويكيبيديا، كاش، صدق ──
+    print('\n[١٧] الإنترنت — بحث مجاني بالكامل، قراءة فقط، وصدق عند الانقطاع')
+    import os as _os
+    import db as _db
+    import web as _web
+    check('ddgs مثبّت — مجاني بالكامل بلا مفتاح ولا تسجيل', _web.HAS_DDGS)
+    _fc = _db.connect('founder')
+    _web.ensure(_fc)
+    _fake = lambda q, n: [{'title': f'نتيجة {i} عن {q}',
+                           'url': f'https://example.test/{i}',
+                           'snippet': 'مقتطف للاختبار'} for i in range(1, 4)]
+    _orig = (_web._ddg, _web._wiki, _web._tavily)
+    try:
+        _web._ddg, _web._wiki = _fake, _fake
+        r = _web.search(_fc, 'اختبار الكاش عبر HTTP ٧٧٧')
+        check('سلسلة المزوّدين تعيد نتائج مهيكلة', r['provider'] == 'ddgs'
+              and len(r['results']) == 3, r['provider'])
+        r2 = _web.search(_fc, 'اختبار الكاش عبر HTTP ٧٧٧')
+        check('الكاش يرد بلا إعادة طلب — توفيرًا للمعدل', r2.get('cached')
+              and 'كاش' in r2['provider'], r2['provider'])
+        _os.environ['TAVILY_API_KEY'] = 'fake-key-for-test'
+        _web._tavily = _fake
+        r3 = _web.search(_fc, 'اختبار تافيلي الاختياري')
+        check('مفتاح Tavily المجاني يتقدم السلسلة إن وُجد',
+              r3['provider'] == 'tavily', r3['provider'])
+        del _os.environ['TAVILY_API_KEY']
+
+        def _boom(q, n):
+            raise OSError('no network')
+        _web._ddg, _web._wiki = _boom, _boom
+        r4 = _web.search(_fc, 'استعلام مقطوع تماما')
+        check('بلا إنترنت: خطأ صادق ولا نتائج مختلَقة',
+              not r4['results'] and 'ما وصلت للإنترنت' in r4['error'],
+              r4.get('error', '')[:50])
+    finally:
+        _web._ddg, _web._wiki, _web._tavily = _orig
+        _fc.close()
+
+    # الكاش المبذور أعلاه يردّ عبر HTTP الحقيقي — بلا شبكة في الاختبار
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ابحث عن اختبار الكاش عبر HTTP ٧٧٧'})
+    ws = [m for m in res['messages'] if m['kind'] == 'websearch']
+    ok_card = bool(ws) and len(ws[0]['payload']['items']) == 3
+    check('«ابحث عن …» تعيد بطاقة بحث من الكاش عبر HTTP', ok_card,
+          str([m['kind'] for m in res['messages']])[:50])
+    check('البطاقة تذكر القاعدة: قراءة فقط ولا قرار بدونك',
+          ok_card and 'بدونك' in ws[0]['payload'].get('note', ''))
+
+    code, res = post('/api/chat', {'thread': 'head_of_ops',
+                                   'text': 'ابحث عن استعلام حي لم يخزن من قبل ٩٩٩'})
+    ws = [m for m in res['messages'] if m['kind'] == 'websearch']
+    txt = res['messages'][-1]['payload'].get('text', '') if res['messages'] else ''
+    check('الاستعلام الحي: نتائج حقيقية أو اعتراف صادق بالانقطاع',
+          bool(ws) or 'ما وصلت للإنترنت' in txt,
+          (ws[0]['payload']['title'][:40] if ws else txt[:40]))
+
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن اختبار الكاش؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    subs = [it['subject'] for m in card for it in m['payload']['items']]
+    check('كل بحث يُحفظ حلقةً في الذاكرة — يُسترجع لاحقًا',
+          any(x.startswith('بحث:') for x in subs), str(subs)[:50])
+
     # ── الحصيلة ──
     ok = sum(1 for _, o, _ in RESULTS if o)
     print('\n' + '=' * 68)

@@ -24,6 +24,7 @@ import agents      # noqa: E402
 import chat        # noqa: E402
 import memory      # noqa: E402
 import sem         # noqa: E402
+import web         # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)                 # جذر المستودع — مجلد memory/ فيه
@@ -37,6 +38,7 @@ chat.seed(_f)
 memory.ensure(_f, ROOT)                      # التدريب من ملفات memory/*.md
 sem.load_synonyms(ROOT)                      # عنقود المترادفات
 sem.load_vectors()                           # متجهات مدرَّبة على نصوصه
+web.ensure(_f)                               # كاش البحث في الإنترنت
 engine.ON_EVENT.append(memory.capture)       # كل رفض/تنفيذ يصير ذكرى
 _f.close()
 

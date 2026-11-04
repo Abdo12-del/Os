@@ -266,6 +266,20 @@ const KIND = {
     }
   },
 
+  websearch(b, p) {
+    b.append(el('h4', null, '🌐 ' + (p.title || 'بحث في الإنترنت')));
+    for (const it of p.items || []) {
+      const d = el('div', 'case');
+      const a = document.createElement('a');
+      a.href = it.url; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = it.title || it.url;
+      d.append(a);
+      if (it.snippet) d.append(el('div', 'msrc', it.snippet));
+      b.append(d);
+    }
+    if (p.note) b.append(el('div', 'msrc', '⚖️ ' + p.note));
+  },
+
   audit(b, p) {
     b.append(el('h4', null, '📜 آخر السجل — لا يُمحى ولا يُعدَّل'));
     for (const r of p.rows || [])

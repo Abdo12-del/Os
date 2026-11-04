@@ -27,6 +27,7 @@ import engine
 import memory
 import nlg
 import sem
+import web
 
 # ── جهات الاتصال ─────────────────────────────────────────────
 THREADS = [
@@ -386,6 +387,7 @@ HELP = ('أفهم هذه — ولا أدّعي غيرها:\n'
         '• ماذا تذكر عن …؟ / ماذا قررت؟ / لماذا رفضت؟\n'
         '• صدّر الذاكرة — اكتبها ملفًّا لتcommitها\n'
         '• درّب الفهم — أعد بناء متجهات الكلمات من نصوصك\n'
+        '• ابحث عن … — بحث مجاني في الإنترنت، بلا مفاتيح (ddgs + ويكيبيديا)\n'
         '• شغّل الوكلاء — يعمل الأربعة\n'
         '• الملخص — ملخص الصباح بأقسامه الثلاثة\n'
         '• المطابقة — حالات المال الست\n'
@@ -406,6 +408,29 @@ def _find_agent(text):
         if aid in text:
             return aid
     return None
+
+
+def _do_websearch(con, thread, q):
+    q = (q or '').strip().rstrip('؟?!.،')
+    if len(q) < 3:
+        _say(con, thread, 'أبحث عن ماذا؟ اكتب الموضوع بعد «ابحث عن» — '
+                          'مثل: ابحث عن أسعار أكاديميات الأطفال أونلاين.')
+        return
+    r = web.search(con, q, n=5)
+    if r.get('error'):
+        _say(con, thread, r['error'])          # صدقٌ بلا اختلاق
+        return
+    items = [{'title': x['title'], 'url': x['url'],
+              'snippet': (x['snippet'] or '')[:160]} for x in r['results']]
+    post(con, thread, 'agent', 'websearch', {
+        'title': f'بحث في الإنترنت عن «{q}» — المزوّد: {r["provider"]}',
+        'items': items,
+        'note': 'قراءة فقط — هذه اقتراحات لك: لا مراسلة، لا نشر، '
+                'ولا قرار بدونك.'})
+    memory.remember(con, 'episode', thread, f'بحث: {q}',
+                    ' | '.join(x['title'] for x in items[:3]),
+                    tags='بحث #انترنت', source=f'web:{r["provider"]}',
+                    importance=.3)
 
 
 def handle(con, thread, text):
@@ -516,6 +541,13 @@ def handle(con, thread, text):
     m = re.search(r'^(?:قررت|قراري)\s*:?\s*(.+)$', t)
     if m:
         _do_decide(con, thread, m.group(1))
+        return _since(con, before)
+
+    # ٣.٦) الإنترنت — بحث مجاني بالكامل (ddgs بلا مفتاح، ويكيبيديا احتياطًا)
+    m = re.search(r'^(ابحث|دور|فتش|ابحثلي)\s*(?:عن|في الانترنت|في النت|على|لي)?\s*(.*)$', t)
+    if m and 'الذاكره' not in t:
+        q = re.sub(r'^(عن|في|على|لي)\s+', '', _raw_after(text, m.group(1)).strip())
+        _do_websearch(con, thread, q)
         return _since(con, before)
 
     # ٤) تشغيل
