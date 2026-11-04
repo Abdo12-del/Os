@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eef1ff">
+<meta name="theme-color" content="#eef0fb">
 <title>مركز العمليات — الدردشة</title>
 <link rel="stylesheet" href="/chat.css">
 </head>
 <body>
+<div id="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
 <div id="app">
 
   <!-- ══ جهات الاتصال ══ -->
@@ -20,7 +21,10 @@
           <p id="sub">…</p>
         </div>
       </div>
-      <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
+      <div class="head-acts">
+        <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع">🌙</button>
+        <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
+      </div>
     </header>
     <div id="threads" role="list"></div>
     <footer class="foot-note">
@@ -37,14 +41,14 @@
         <b id="head-name">…</b>
         <span id="head-status">…</span>
       </div>
-      <button id="revoke-btn" title="إيقاف / استئناف الوكيل">⛔</button>
+      <button id="revoke-btn" title="إيقاف / استئناف الوكيل"></button>
     </header>
 
     <div id="msgs" aria-live="polite"></div>
 
     <div id="chips"></div>
     <form id="composer" autocomplete="off">
-      <input id="inp" placeholder="اكتب… «موافقة 12» · «رفض 12 السبب: …» · «الملخص»">
+      <input id="inp" placeholder="اكتب… «موافقة 12» · «رفض 12 السبب: …» · «الملخص» · «ابحث عن …»">
       <button id="send" type="submit" aria-label="إرسال">➤</button>
     </form>
   </main>

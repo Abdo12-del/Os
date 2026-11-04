@@ -370,4 +370,20 @@ setInterval(async () => {
   loadThreads();
 }, 3000);
 
+/* ── ليلي / نهاري — محفوظ في المتصفح، ويبدأ من تفضيل النظام ── */
+const _themeBtn = $('#theme-btn');
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('ops-theme', t); } catch (e) { /* خاص */ }
+  _themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  const mt = document.querySelector('meta[name="theme-color"]');
+  if (mt) mt.content = t === 'dark' ? '#12142b' : '#eef0fb';
+}
+let _savedTheme = null;
+try { _savedTheme = localStorage.getItem('ops-theme'); } catch (e) { /* خاص */ }
+setTheme(_savedTheme
+  || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+_themeBtn.onclick = () =>
+  setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
 loadThreads();
