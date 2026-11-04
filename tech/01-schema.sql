@@ -51,7 +51,9 @@ CREATE TABLE IF NOT EXISTS pending_actions (
   decided_by      TEXT,
   decided_at      TIMESTAMPTZ,
   executed_at     TIMESTAMPTZ,                 -- يبقى NULL حتى ينفّذه تطبيقك أنت
-  idempotency_key TEXT UNIQUE NOT NULL         -- يمنع تكرار نفس الاقتراح (القاعدة 14 للمحاسب)
+  idempotency_key TEXT UNIQUE NOT NULL         -- يمنع تكرار نفس الاقتراح
+                                             -- (قاعدة المحاسب 14 في 07-prompts/04-accountant.md،
+                                             --  لا القاعدة 14 في 05-rules.md — فعددها 11)
 );
 CREATE INDEX IF NOT EXISTS idx_pending_open   ON pending_actions (status, created_at);
 CREATE INDEX IF NOT EXISTS idx_pending_agent  ON pending_actions (agent, status);
