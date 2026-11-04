@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مركز العمليات — أكاديمية تنمية شخصية الطفل</title>
+<meta name="description" content="الملخص اليومي، طابور الموافقات، وسجلّ كل فعل">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <div>
+      <h1>🎛️ مركز العمليات</h1>
+      <p class="sub">أكاديمية أونلاين لتنمية شخصية الطفل — <b>ليست دعمًا مدرسيًا</b></p>
+    </div>
+    <div class="hside">
+      <span id="clock" class="clock"></span>
+      <button id="run" class="btn run" title="يشغّل الوكلاء الأربعة">▶ شغّل الوكلاء</button>
+    </div>
+  </div>
+  <nav id="tabs">
+    <button data-t="brief" class="on">الملخص اليومي</button>
+    <button data-t="pending">يحتاج قرارك <span id="b-pending" class="badge">0</span></button>
+    <button data-t="money">المال</button>
+    <button data-t="marketing">التسويق</button>
+    <button data-t="agents">الوكلاء</button>
+    <button data-t="audit">السجلّ</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ══════════ الملخص اليومي ══════════ -->
+  <section id="brief" class="on">
+    <div class="note">
+      <b>هذا ما يصلك كل صباح.</b> حقائق لا أحكام — <code>days_open</code> إلزامي،
+      و<code>broken</code> لا يُكتم، و<code>missing</code> حاضر دائمًا ولو كان فارغًا.
+    </div>
+    <div id="brief-body"><p class="loading">…</p></div>
+  </section>
+
+  <!-- ══════════ يحتاج قرارك ══════════ -->
+  <section id="pending">
+    <div class="note warn">
+      <b>لا شيء يخرج من هنا بدونك.</b> الموافقة تُنفَّذ في تطبيقك — ما عدا
+      <code>publish_post</code> و<code>send_parent_msg</code>: يُسجَّلان <i>موافَقًا عليهما</i>
+      ويبقى <code>executed_at</code> فارغًا إلى الأبد، <b>لأنه لا يوجد لهما تنفيذ في الكود أصلًا</b>.
+    </div>
+    <div id="pending-body"><p class="loading">…</p></div>
+  </section>
+
+  <!-- ══════════ المال ══════════ -->
+  <section id="money">
+    <div class="note">
+      <b>مرجع المال = نظام المحاسبة.</b> نظام الأولياء مرجع للتقييمات.
+      عند خلاف مالي، نظام المحاسبة يفوز والفرق يُبلَّغ كـ«نظام الأولياء غير محدَّث».
+    </div>
+    <h2>مطابقة أكتوبر 2026</h2>
+    <div id="rec-body"><p class="loading">…</p></div>
+    <h2>مستندات الأساتذة</h2>
+    <div id="t-body"><p class="loading">…</p></div>
+    <h2>التدفقات الثلاثة</h2>
+    <div id="sum-body"><p class="loading">…</p></div>
+  </section>
+
+  <!-- ══════════ التسويق ══════════ -->
+  <section id="marketing">
+    <div class="note">
+      <b>العنق الزجاجة هو الوصول لا الإقناع.</b> وأكبر تسرّب عندك ليس في المحتوى —
+      بل في مهتمين لم يُرد عليهم إطلاقًا.
+    </div>
+    <h2>القمع</h2>
+    <div id="fun-body"><p class="loading">…</p></div>
+    <h2>طابور الرد الأول — قاعدة الـ60 ثانية</h2>
+    <div id="leads-body"><p class="loading">…</p></div>
+  </section>
+
+  <!-- ══════════ الوكلاء ══════════ -->
+  <section id="agents">
+    <div class="note">
+      الوكيل يفتح اتصالًا بـ <code>PRAGMA query_only</code> — أي كتابة يرفضها المحرّك نفسه،
+      لا التعليمات. والحذف ممنوع بـ <code>trigger</code> <b>ولو عليك أنت</b>.
+    </div>
+    <div id="agents-body"><p class="loading">…</p></div>
+  </section>
+
+  <!-- ══════════ السجلّ ══════════ -->
+  <section id="audit">
+    <div class="note">
+      <b>كل فعل يُسجَّل — بما فيه الرفض و«لا أعرف».</b> السجلّ لا يُعدَّل ولا يُمحى:
+      <code>trigger</code> يرفض <code>UPDATE</code> و<code>DELETE</code> عليه.
+    </div>
+    <div id="audit-body"><p class="loading">…</p></div>
+  </section>
+
+</main>
+
+<footer>
+  بيانات <b>مختلَقة</b> من <code>tests/fixtures</code> — لا اسم طفل حقيقي ولا مبلغ حقيقي.
+  هذا محرّك يعمل، لا واجهة عرض: الأرقام محسوبة من القاعدة في كل طلب.
+</footer>
+
+<div id="modal" class="modal" hidden>
+  <div class="mbox">
+    <h3 id="m-title"></h3>
+    <p id="m-text"></p>
+    <textarea id="m-reason" rows="3" placeholder="السبب إلزامي — هو الطريقة الوحيدة لتحسّن الوكيل"></textarea>
+    <div class="mrow">
+      <button id="m-ok" class="btn bad">ارفض</button>
+      <button id="m-cancel" class="btn">ألغِ</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>

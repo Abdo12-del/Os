@@ -20,3 +20,9 @@ finance/*.csv
 
 # خرج بناء الموقع — يُبنى عند النشر، لا يُخزَّن
 site/dist/
+
+# قاعدة مركز العمليات — بيانات، لا تدخل Git
+ops/ops.db
+ops/ops.db-wal
+ops/ops.db-shm
+__pycache__/

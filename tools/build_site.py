@@ -66,6 +66,9 @@ GROUPS = [
         ('templates/teacher-agreement.md', 'اتفاق الأستاذ'),
         ('templates/monthly-progress-report.md', 'دليل التقدّم الشهري'),
     ]),
+    ('يعمل الآن — مركز العمليات', [
+        ('ops/README.md', '★ محرّك يعمل، لا وثيقة'),
+    ]),
     ('البنية التقنية (أنت المبرمج)', [
         ('tech/01-schema.sql', 'مخطط قاعدة البيانات'),
         ('tech/02-api-contracts.md', 'عقود الـ API'),

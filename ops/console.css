@@ -1,0 +1,156 @@
+/* مركز العمليات — RTL، الهاتف أولًا، بلا خطوط خارجية */
+:root{
+  --bg:#f6f3ee; --fg:#1c1a17; --mut:#6f6862; --line:#e0d8cd;
+  --card:#fffdfa; --acc:#8c5a2b; --acc-bg:#f7efe4;
+  --red:#a92b21; --red-bg:#fceeed;
+  --amber:#8a6100; --amber-bg:#fdf4de;
+  --green:#2c6a3a; --green-bg:#ebf4ec;
+  --blue:#26557a; --blue-bg:#eaf1f7;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#131110;--fg:#ece7e0;--mut:#9a928a;--line:#2c2825;
+        --card:#1b1815;--acc:#d9a05b;--acc-bg:#251e15;
+        --red:#ef9c93;--red-bg:#2b1a18;--amber:#e6c679;--amber-bg:#27200f;
+        --green:#8fce99;--green-bg:#15241a;--blue:#8fc0e6;--blue-bg:#14222e;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Arabic",
+              "Noto Naskh Arabic",Tahoma,"Geeza Pro",sans-serif;
+  font-size:16px;line-height:1.75;
+}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+     font-size:.85em;background:var(--acc-bg);padding:.1em .35em;border-radius:4px;
+     direction:ltr;unicode-bidi:embed}
+
+/* ── الرأس ── */
+header{position:sticky;top:0;z-index:30;background:var(--card);
+       border-bottom:1px solid var(--line)}
+.hwrap{display:flex;align-items:center;gap:1rem;justify-content:space-between;
+       padding:.7rem clamp(.8rem,3vw,1.6rem);flex-wrap:wrap}
+h1{font-size:1.1rem;margin:0;font-weight:800;line-height:1.4}
+.sub{margin:.1rem 0 0;font-size:.78rem;color:var(--mut);line-height:1.5}
+.hside{display:flex;align-items:center;gap:.6rem}
+.clock{font-size:.78rem;color:var(--mut);direction:ltr;font-variant-numeric:tabular-nums}
+
+nav{display:flex;gap:.25rem;overflow-x:auto;padding:.35rem clamp(.5rem,3vw,1.2rem) .55rem;
+    scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:none;background:none;border:1px solid transparent;color:var(--mut);
+  font:inherit;font-size:.83rem;padding:.3rem .75rem;border-radius:99px;cursor:pointer;
+  white-space:nowrap}
+nav button:hover{background:var(--acc-bg);color:var(--acc)}
+nav button.on{background:var(--acc);color:#fff;font-weight:700;border-color:var(--acc)}
+.badge{display:inline-block;background:var(--red);color:#fff;border-radius:99px;
+  font-size:.68rem;padding:0 .38rem;margin-inline-start:.3rem;font-weight:800;
+  min-width:1.2rem;text-align:center}
+nav button.on .badge{background:#fff;color:var(--acc)}
+
+/* ── الأقسام ── */
+main{padding:1.2rem clamp(.8rem,3vw,1.6rem) 4rem;max-width:64rem;margin:0 auto}
+section{display:none}
+section.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+h2{font-size:1.05rem;margin:2rem 0 .7rem;font-weight:800;
+   padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:.95rem;margin:1.2rem 0 .4rem;font-weight:700}
+
+.note{background:var(--blue-bg);border-inline-start:3px solid var(--blue);
+  padding:.65rem .9rem;border-radius:0 8px 8px 0;font-size:.86rem;margin-bottom:1.2rem}
+.note.warn{background:var(--amber-bg);border-color:var(--amber)}
+
+/* ── البطاقات ── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:.9rem 1rem;margin-bottom:.8rem}
+.card.red{border-inline-start:4px solid var(--red);background:var(--red-bg)}
+.card.amber{border-inline-start:4px solid var(--amber);background:var(--amber-bg)}
+.card.green{border-inline-start:4px solid var(--green);background:var(--green-bg)}
+.card h3{margin-top:0}
+.crow{display:flex;align-items:baseline;gap:.5rem;justify-content:space-between;flex-wrap:wrap}
+.tag{font-size:.68rem;font-weight:800;padding:.1rem .5rem;border-radius:99px;
+  background:var(--acc-bg);color:var(--acc);white-space:nowrap}
+.tag.red{background:var(--red);color:#fff}
+.tag.amber{background:var(--amber);color:#fff}
+.tag.green{background:var(--green);color:#fff}
+.tag.grey{background:var(--line);color:var(--mut)}
+.det{font-size:.85rem;color:var(--mut);margin:.25rem 0 0}
+.meta{font-size:.75rem;color:var(--mut);margin-top:.45rem;direction:ltr;text-align:start}
+
+/* ── الأزرار ── */
+.btn{font:inherit;font-size:.83rem;padding:.35rem .9rem;border-radius:8px;cursor:pointer;
+  border:1px solid var(--line);background:var(--card);color:var(--fg)}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.ok{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+.btn.ok:hover{opacity:.88;color:#fff}
+.btn.bad{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+.btn.bad:hover{opacity:.88;color:#fff}
+.btn.run{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700;font-size:.8rem}
+.btn.run:hover{opacity:.9;color:#fff}
+.btn.sm{font-size:.76rem;padding:.25rem .6rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.acts{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+.manual{background:var(--amber-bg);border:1px dashed var(--amber);border-radius:8px;
+  padding:.5rem .7rem;font-size:.8rem;margin-top:.6rem;color:var(--amber)}
+
+/* ── الجداول: بطاقات على الهاتف ── */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:.8rem 0;
+  background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{padding:.5rem .7rem;text-align:start;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--acc-bg);font-weight:800;font-size:.76rem;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+.num{direction:ltr;text-align:end;font-variant-numeric:tabular-nums}
+
+@media (max-width:700px){
+  .tbl{overflow:visible;border:0;background:none}
+  table,thead,tbody,tr,th,td{display:block;width:auto}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  tbody tr{border:1px solid var(--line);border-radius:10px;padding:.45rem .7rem;
+    margin-bottom:.6rem;background:var(--card)}
+  td{border:0;padding:.28rem 0}
+  td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:800;
+    color:var(--mut)}
+  td:empty::before{content:none}
+  .num{text-align:start}
+  h1{font-size:1rem}
+}
+
+/* ── القمع ── */
+.funnel{display:flex;flex-direction:column;gap:.35rem;margin:.8rem 0}
+.frow{display:flex;align-items:center;gap:.6rem}
+.fbar{height:1.7rem;background:var(--acc);border-radius:5px;min-width:2px;
+  transition:width .3s ease}
+.frow.leak .fbar{background:var(--red)}
+.flabel{font-size:.8rem;flex:none;width:11rem}
+.fval{font-size:.8rem;color:var(--mut);direction:ltr;font-variant-numeric:tabular-nums}
+@media (max-width:700px){.flabel{width:7.5rem;font-size:.74rem}}
+
+/* ── نافذة الرفض ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;
+  z-index:100;padding:1rem}
+.modal[hidden]{display:none}
+.mbox{background:var(--card);border-radius:14px;padding:1.2rem;max-width:26rem;width:100%}
+.mbox h3{margin-top:0}
+.mbox textarea{width:100%;font:inherit;font-size:.88rem;padding:.5rem;border-radius:8px;
+  border:1px solid var(--line);background:var(--bg);color:var(--fg);resize:vertical}
+.mrow{display:flex;gap:.5rem;margin-top:.8rem;justify-content:flex-start}
+
+/* ── إشعار ── */
+#toast{position:fixed;bottom:1.2rem;inset-inline-start:50%;transform:translateX(50%);
+  background:var(--fg);color:var(--bg);padding:.6rem 1.1rem;border-radius:99px;
+  font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;
+  max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+#toast.err{background:var(--red);color:#fff}
+
+.loading{color:var(--mut);text-align:center;padding:2rem 0}
+.empty{color:var(--mut);font-size:.88rem;padding:.8rem 0}
+footer{border-top:1px solid var(--line);padding:1.2rem clamp(.8rem,3vw,1.6rem) 2rem;
+  color:var(--mut);font-size:.76rem;text-align:center;max-width:64rem;margin:0 auto}
+.mono{direction:ltr;unicode-bidi:embed;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:.8rem}
+pre.txt{background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:.7rem .85rem;overflow-x:auto;font-size:.8rem;white-space:pre-wrap;
+  line-height:1.7;margin:.5rem 0}
