@@ -80,6 +80,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._file('chat.css', 'text/css; charset=utf-8')
         if p == '/chat.js':
             return self._file('chat.js', 'application/javascript; charset=utf-8')
+        if p == '/mascot.png':
+            return self._file('mascot.png', 'image/png')
         if p in ('/console', '/tables'):
             return self._file('console.html', 'text/html; charset=utf-8')
         if p == '/style.css':

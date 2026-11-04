@@ -15,6 +15,11 @@ const el = (tag, cls, txt) => {
   return n;
 };
 const hhmm = iso => (iso || '').slice(11, 16);
+/* أيقونة كل دور — بلاطات وبطاقات ورأس المحادثة */
+const T_ICON = {
+  head_of_ops: 'i-comp', accountant: 'i-calc',
+  marketing: 'i-mega', lead_nurturer: 'i-chats',
+};
 /* أيقونة متجهية من الطقم — لا إيموجي في الواجهة */
 const ic = n => {
   const d = document.createElement('span');
@@ -184,26 +189,31 @@ async function loadThreads() {
   pill.append(ic(pend > 0 ? 'clock' : 'checkc'),
     document.createTextNode(pend > 0 ? ` ${pend} بانتظار قرارك` : ' لا معلّق اليوم'));
   pill.onclick = () => openThread('head_of_ops');
-  const row = $('#agent-row');
-  row.textContent = '';
+  const tiles = $('#tiles');
+  tiles.textContent = '';
   for (const t of THREADS) {
-    const cell = el('button', 'agent-cell');
-    cell.title = t.name;
-    const orb = el('span', 'agent-orb ' + t.grad, mono(t.name));
     const unread = t.last_id - (READ[t.id] || 0);
-    if (unread > 0 && t.id !== CUR) orb.append(el('span', 'badge', String(unread)));
-    if (t.revoked_at) orb.classList.add('off');
-    cell.append(orb, el('span', 'agent-name', t.name));
+    const cell = el('button', 'tile');
+    cell.title = t.name;
+    const icn = el('span', 'tile-ic ' + t.grad);
+    icn.append(ic(T_ICON[t.id] || 'i-chat'));
+    if (unread > 0 && t.id !== CUR)
+      icn.append(el('span', 'badge' + (t.pending_count > 0 ? ' red' : ''),
+        String(unread)));
+    if (t.revoked_at) icn.classList.add('off');
+    cell.append(icn, el('b', null, t.name));
     cell.onclick = () => openThread(t.id);
-    row.append(cell);
+    tiles.append(cell);
   }
+  $('#bell-dot').hidden = pend === 0;
   for (const t of THREADS) {
     const unread0 = t.last_id - (READ[t.id] || 0);
     const row = el('div', 't-row' + (t.revoked_at ? ' revoked' : '')
       + (unread0 > 0 ? ' unred' : ''));
     row.setAttribute('role', 'listitem');
     row.dataset.id = t.id;
-    const av = el('span', 'avatar ' + t.grad, mono(t.name));
+    const av = el('span', 'tav ' + t.grad);
+    av.append(ic(T_ICON[t.id] || 'i-chat'));
     const tx = el('div', 'tx');
     const nm = el('div', 'nm');
     nm.append(el('b', null, t.name), el('time', null, hhmm(t.last_at)));
@@ -222,7 +232,9 @@ async function openThread(id) {
   const t = THREADS.find(x => x.id === id) || {};
   app.classList.add('show-chat');
   $('#pane-chat').classList.remove('hidden');
-  $('#head-av').textContent = mono(t.name || '؟');
+  const hav = $('#head-av');
+  hav.textContent = '';
+  hav.append(ic(T_ICON[t.id] || 'i-chat'));
   $('#head-av').className = 'avatar sm ' + (t.grad || 'g1');
   $('#head-name').textContent = t.name || id;
   $('#head-status').textContent = t.revoked_at
@@ -571,5 +583,61 @@ try { _savedTheme = localStorage.getItem('ops-theme-v2'); } catch (e) { /* خا�
 setTheme(_savedTheme || 'light');   // الـ pastel هو وجه النظام؛ الليلي بزرّه
 _themeBtn.onclick = () =>
   setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
+/* ── شريط التنقل السفلي + الدرج: خمس محطات حقيقية لا ديكور ── */
+const SHEET = $('#sheet'), SBACK = $('#sheet-back');
+const closeSheet = () => { SHEET.hidden = true; SBACK.hidden = true; };
+function openSheet(title, rows) {
+SHEET.textContent = '';
+SHEET.append(el('h3', null, title));
+for (const r of rows) SHEET.append(r);
+SHEET.hidden = false; SBACK.hidden = false;
+}
+SBACK.onclick = closeSheet;
+const shRow = (icon, label) => {
+const b = el('button', 'sh-row');
+b.append(ic(icon), el('span', null, label));
+return b;
+};
+$('#tabbar').addEventListener('click', e => {
+const btn = e.target.closest('button[data-nav]');
+if (!btn) return;
+const nav = btn.dataset.nav;
+if (nav === 'home') {
+  if (CUR) $('#back').onclick();
+  else { const sc = $('#pane-threads .scroll'); sc && sc.scrollTo({ top: 0, behavior: 'smooth' }); }
+  closeSheet();
+} else if (nav === 'reports') {
+  location.href = '/console#brief';          /* الملخص اليومي = التقارير */
+} else if (nav === 'schedule') {
+  location.href = '/console#pending';        /* طابور القرارات المؤجّلة = جدولك */
+} else if (nav === 'alerts') {
+  const rows = THREADS.filter(t => t.pending_count > 0).map(t => {
+    const r = shRow(T_ICON[t.id] || 'i-chat', t.name);
+    r.append(el('span', 'cnt red', String(t.pending_count)));
+    r.onclick = () => { closeSheet(); openThread(t.id); };
+    return r;
+  });
+  if (!rows.length) {
+    const r = shRow('checkc', 'لا إشعارات — لا شيء ينتظر قرارك');
+    r.disabled = true;
+    rows.push(r);
+  }
+  openSheet('الإشعارات: قرارات تنتظرك', rows);
+} else if (nav === 'settings') {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const theme = shRow(dark ? 'sun' : 'moon',
+    dark ? 'الوضع ليلي — المس للنهار' : 'الوضع نهاري — المس لليل');
+  theme.onclick = () => { setTheme(dark ? 'light' : 'dark'); closeSheet(); };
+  const tables = el('a', 'sh-row');
+  tables.href = '/console';
+  tables.append(ic('grid'), el('span', null, 'الجداول الكاملة: المال والتسويق والسجل'));
+  const status = shRow(DEMO ? 'eye' : 'zap',
+    DEMO ? 'معاينة بعينة بيانات — الحيّ على جهازك: python3 ops/server.py'
+         : 'خادم حي على جهازك — البيانات حقيقية');
+  status.disabled = true;
+  openSheet('الإعدادات', [theme, tables, status]);
+}
+});
 
 loadThreads();

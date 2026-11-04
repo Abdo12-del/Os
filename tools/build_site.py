@@ -29,7 +29,7 @@ def main():
     ops = os.path.join(ROOT, 'ops')
     shutil.copy(os.path.join(ops, 'chat.html'), os.path.join(OUT, 'index.html'))
     shutil.copy(os.path.join(ops, 'chat.html'), os.path.join(OUT, 'chat.html'))
-    for f in ('chat.css', 'chat.js'):
+    for f in ('chat.css', 'chat.js', 'mascot.png'):
         shutil.copy(os.path.join(ops, f), os.path.join(OUT, f))
     print('✅ واجهة الدردشة → site/dist/ (index.html) — الوثائق markdown '
           'في المستودع، بلا واجهة منشورة')

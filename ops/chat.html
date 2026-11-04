@@ -14,30 +14,43 @@
 
   <!-- ══ جهات الاتصال ══ -->
   <aside id="pane-threads">
-    <header class="grad">
-      <div class="grad-top">
-        <div class="me">
-          <span class="avatar founder">أ</span>
-          <div>
-            <h1>مركز العمليات</h1>
-            <p id="sub" class="sub-pill">…</p>
-          </div>
-        </div>
-        <div class="head-acts">
-          <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع"><svg class="ic"><use href="#i-moon"/></svg></button>
-          <a id="to-tables" href="/console" title="عرض الجداول الكاملة"><svg class="ic"><use href="#i-grid"/></svg></a>
+    <header class="top-bar">
+      <div class="me">
+        <span class="avatar founder">أ</span>
+        <div>
+          <h1>مركز العمليات</h1>
+          <p class="sub-line">NG Academy · نظام وكلائك</p>
         </div>
       </div>
-      <div id="agent-row" class="agent-row" aria-label="وكلاؤك"></div>
+      <div class="head-acts">
+        <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع"><svg class="ic"><use href="#i-moon"/></svg></button>
+        <a id="to-tables" href="/console" title="عرض الجداول الكاملة"><svg class="ic"><use href="#i-grid"/></svg></a>
+      </div>
     </header>
-    <div class="sec-head">
-      <b><svg class="ic s15"><use href="#i-chat"/></svg> المحادثات</b>
-      <button id="pend-pill" class="sec-pill" title="افتح محادثة رئيس العمليات">…</button>
+
+    <div class="scroll">
+      <section class="hero" aria-label="ترحيب">
+        <img class="mascot" src="/mascot.png" alt="تميمة الأكاديمية">
+        <div class="hero-txt">
+          <h2>مرحبًا بك في<br>مركز العمليات!</h2>
+          <p class="hero-sub">كل ما تحتاجه لإدارة دوراتك بسهولة</p>
+          <p id="sub" class="hero-count">…</p>
+        </div>
+      </section>
+
+      <section class="tiles" id="tiles" aria-label="وكلاؤك الأربعة"></section>
+
+      <div class="sec-head">
+        <b><span class="sec-ic"><svg class="ic"><use href="#i-chats"/></svg></span> المحادثات</b>
+        <button id="pend-pill" class="sec-pill" title="افتح محادثة رئيس العمليات">…</button>
+      </div>
+
+      <div id="threads" role="list"></div>
+
+      <footer class="foot-note">
+        <svg class="ic s12"><use href="#i-lock"/></svg> كل رسالة مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول الكاملة</a>
+      </footer>
     </div>
-    <div id="threads" role="list"></div>
-    <footer class="foot-note">
-      <svg class="ic s12"><use href="#i-lock"/></svg> كل رسالة مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول الكاملة</a>
-    </footer>
   </aside>
 
   <!-- ══ المحادثة ══ -->
@@ -62,7 +75,26 @@
   </main>
 
 </div>
+<nav id="tabbar" aria-label="التنقل الرئيسي">
+  <button data-nav="settings" title="الإعدادات"><svg class="ic"><use href="#i-gear"/></svg><span>الإعدادات</span></button>
+  <button data-nav="alerts" title="الإشعارات"><span class="bellwrap"><svg class="ic"><use href="#i-bell"/></svg><i id="bell-dot" hidden></i></span><span>الإشعارات</span></button>
+  <button data-nav="home" class="fab" title="الرئيسية" aria-label="الرئيسية"><svg class="ic s22"><use href="#i-home"/></svg></button>
+  <button data-nav="schedule" title="الجدول"><svg class="ic"><use href="#i-cal"/></svg><span>الجدول</span></button>
+  <button data-nav="reports" title="التقارير"><svg class="ic"><use href="#i-chart"/></svg><span>التقارير</span></button>
+</nav>
+<div id="sheet-back" hidden></div>
+<div id="sheet" role="dialog" aria-modal="true" hidden></div>
+
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-comp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="15.8 8.2 10.6 10.6 8.2 15.8 13.4 13.4"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol>
+<symbol id="i-chats" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/><circle cx="8.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20v-6M11 20V6M16 20v-9M21 20v-4"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-6h4v6"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
 <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>

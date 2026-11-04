@@ -446,3 +446,16 @@ $('#run').addEventListener('click', async () => {
 loadBrief();
 api('/api/pending').then(d => { $('#b-pending').textContent = d.pending.length; })
   .catch(() => {});
+
+/* مرساة التبويب: /console#pending يفتح التبويب مباشرة — لشريط التنقل السفلي */
+(function () {
+  const h = location.hash.slice(1);
+  if (!h) return;
+  const go = () => {
+    const b = document.querySelector('#tabs [data-t="' + h + '"]');
+    if (b) b.click();
+  };
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', go);
+  else go();
+})();
