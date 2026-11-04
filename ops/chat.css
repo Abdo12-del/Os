@@ -62,15 +62,13 @@ body{
                      top:38%; inset-inline-end:26%; animation-delay:-9s}
 @keyframes float{to{transform:translateY(6vmin) scale(1.12)}}
 
-#app{display:flex; height:100dvh; max-width:1120px; margin:0 auto;
-     padding:clamp(0px,1.4vmin,14px); gap:clamp(0px,1.4vmin,14px)}
+#app{display:flex; height:100dvh; max-width:none; margin:0; padding:0; gap:0}
 
 /* ── جهات الاتصال: لوح زجاجي ── */
 #pane-threads{
-  width:344px; min-width:300px; display:flex; flex-direction:column;
+  width:360px; min-width:300px; display:flex; flex-direction:column;
   background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--brd); border-radius:28px; overflow:hidden;
-  box-shadow:var(--sh);
+  border:0; border-radius:0; overflow:hidden;
 }
 .grad{
   padding:20px 18px 14px; display:flex; flex-direction:column; gap:12px;
@@ -170,32 +168,34 @@ html[data-theme="dark"] .avatar{
 
 #threads{flex:1; overflow-y:auto; padding:4px 8px 10px; display:flex;
          flex-direction:column; gap:0}
+/* الصف: 70px، أفاتار 54 بلا حلقات، فاصل شعري يبدأ بعد الأفاتار —
+   القياسات مستخرجة من تلجرام أندرويد الرسمي (70dp/56dp/72dp inset) */
 .t-row{
-  display:flex; gap:12px; align-items:center; padding:12px 10px; cursor:pointer;
-  position:relative; border:0; border-radius:22px; background:transparent;
-  transition:background .15s;
+  display:flex; gap:14px; align-items:center; padding:9px 16px; cursor:pointer;
+  position:relative; border:0; border-radius:0; background:transparent;
+  min-height:70px; transition:background .15s;
 }
 .t-row:hover,.t-row:active{background:var(--chip)}
 .t-row:not(:last-child)::after{
-  content:""; position:absolute; inset-inline:12px; bottom:0; height:1px;
-  background:var(--brd-soft);
+  content:""; position:absolute; inset-inline-start:84px; inset-inline-end:16px;
+  bottom:0; height:1px; background:var(--brd-soft);
 }
-.t-row .avatar{width:50px; height:50px; font-size:23px;
-  box-shadow:0 0 0 2.5px var(--bg1), 0 8px 18px rgba(25,15,60,.18)}
-html[data-theme="dark"] .t-row .avatar{
-  box-shadow:0 0 0 2.5px var(--bg1), 0 8px 18px rgba(0,0,0,.45)}
+.t-row .avatar{width:54px; height:54px; font-size:25px; box-shadow:none}
 .t-row .tx{flex:1; min-width:0}
 .t-row .nm{display:flex; justify-content:space-between; gap:8px; align-items:baseline}
-.t-row .nm b{font-size:15px; font-weight:800; letter-spacing:.1px}
-.t-row .nm time{font-size:10.5px; color:var(--mut); flex:none}
-.t-row .pv{font-size:12.5px; color:var(--mut); white-space:nowrap;
-           overflow:hidden; text-overflow:ellipsis; margin-top:1px}
+.t-row .nm b{font-size:16px; font-weight:600}
+.t-row .nm time{font-size:12px; color:var(--mut); flex:none}
+.t-row.unred .nm b{font-weight:800}
+.t-row.unred .nm time{color:#16a34a; font-weight:700}
+html[data-theme="dark"] .t-row.unred .nm time{color:#4ade80}
+.t-row .pv{font-size:13.5px; color:var(--mut); white-space:nowrap;
+           overflow:hidden; text-overflow:ellipsis; margin-top:2px}
+/* شارة غير المقروء: أخضر عشبي — عُرف iOS/واتساب/تلجرام، لا لون العلامة */
 .badge{
-  flex:none; align-self:center;
-  background:linear-gradient(135deg,#ec4899,#8b5cf6); color:#fff;
-  font-size:11px; font-weight:800; min-width:22px; height:22px; padding:0 7px;
-  border-radius:11px; display:grid; place-items:center;
-  box-shadow:0 4px 12px rgba(236,72,153,.35);
+  flex:none; align-self:flex-end; margin-bottom:4px;
+  background:#22c55e; color:#fff;
+  font-size:11px; font-weight:700; min-width:20px; height:20px; padding:0 6px;
+  border-radius:999px; display:grid; place-items:center; box-shadow:none;
 }
 .revoked{opacity:.55}
 .revoked .avatar::after{background:#94a3b8}
@@ -207,33 +207,36 @@ html[data-theme="dark"] .t-row .avatar{
 html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 
 /* ── المحادثة ── */
+/* سطح المحادثة شفاف: الخلفية نفسها «ورق الحائط» والفقاعات تطفو عليه،
+   كما في تلجرام وواتساب — لا بطاقة مستديرة تحجز العين */
 #pane-chat{flex:1; display:flex; flex-direction:column; min-width:0;
-           background:var(--glass); backdrop-filter:var(--blur);
-           -webkit-backdrop-filter:var(--blur);
-           border:1px solid var(--brd); border-radius:28px; overflow:hidden;
-           box-shadow:var(--sh)}
+           background:transparent; border:0; border-radius:0; overflow:hidden}
+@media (min-width:761px){
+  #pane-chat{border-inline-start:1px solid var(--brd-soft)}
+}
 #pane-chat.hidden{display:none}
 .chat-head{
-  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  display:flex; align-items:center; gap:10px; padding:8px 12px; min-height:56px;
   border-bottom:1px solid var(--brd-soft); background:var(--glass-2);
   backdrop-filter:blur(10px); position:sticky; top:0; z-index:5;
 }
 #back{border:0; background:none; font-size:24px; color:var(--mut); cursor:pointer;
       padding:2px 8px; line-height:1}
 .who{flex:1; min-width:0}
-.who b{display:block; font-size:15px}
-.who span{font-size:11px; color:var(--mut)}
+.who b{display:block; font-size:16px; font-weight:700}
+.who span{font-size:12px; color:var(--mut)}
 #revoke-btn{border:1px solid var(--brd-soft); background:var(--chip); border-radius:12px;
             width:36px; height:36px; cursor:pointer; font-size:15px}
 
-#msgs{flex:1; overflow-y:auto; padding:18px 16px 8px; scroll-behavior:smooth}
-.msg{display:flex; margin:0 0 12px; gap:8px; align-items:flex-end;
+#msgs{flex:1; overflow-y:auto; padding:14px 14px 8px; scroll-behavior:smooth}
+.msg{display:flex; margin:0 0 10px; gap:8px; align-items:flex-end;
      animation:pop .28s cubic-bezier(.2,.9,.3,1.2)}
+.msg.gnx{margin-bottom:3px}
 @keyframes pop{from{opacity:0; transform:translateY(8px) scale(.97)}}
 .msg .avatar{width:30px; height:30px; font-size:15px; flex:none}
 .msg .avatar::after{display:none}
 .bub{
-  max-width:min(78%, 560px); padding:11px 15px; border-radius:22px;
+  max-width:min(78%, 560px); padding:9px 14px 7px; border-radius:18px;
   background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.78)),var(--ag-bub);
   backdrop-filter:blur(10px);
   border:1px solid var(--brd);
@@ -241,16 +244,27 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
   white-space:pre-wrap; word-break:break-word;
 }
 .msg.me{flex-direction:row-reverse}
+/* الذيل = الزاوية 4px نحو صاحب الكلام؛ المجموعة تقارب 6px بلا ذيل إلا آخرها */
 .msg.me .bub{
   background:linear-gradient(135deg,var(--me1),var(--me2)); color:var(--me-ink);
-  border:0; border-radius:22px 22px 8px 22px;
-  box-shadow:0 6px 18px rgba(124,92,255,.35);
+  border:0; border-radius:18px 18px 18px 4px;
+  box-shadow:0 4px 14px rgba(124,92,255,.30);
 }
-.msg.ag .bub{border-radius:22px 22px 22px 8px}
+.msg.me.gpv .bub{border-radius:6px 18px 18px 4px}
+.msg.me.gnx .bub{border-radius:18px 18px 18px 6px}
+.msg.me.gpv.gnx .bub{border-radius:6px 18px 18px 6px}
+.msg.ag .bub{border-radius:18px 18px 4px 18px}
+.msg.ag.gpv .bub{border-radius:18px 6px 4px 18px}
+.msg.ag.gnx .bub{border-radius:18px 18px 6px 18px}
+.msg.ag.gpv.gnx .bub{border-radius:18px 6px 6px 18px}
 .msg.sys{justify-content:center}
-.msg.sys .bub{background:transparent; box-shadow:none; border:0; color:var(--mut);
-              font-size:12px; text-align:center; max-width:90%}
-.time{display:block; font-size:10px; opacity:.6; margin-top:6px; text-align:end}
+.msg.sys .bub{background:var(--chip); box-shadow:none; border:1px solid var(--brd-soft);
+              color:var(--mut); font-size:11px; text-align:center; max-width:90%;
+              border-radius:999px; padding:4px 14px; backdrop-filter:blur(6px)}
+.time{float:left; font-size:10px; opacity:.7; margin:9px 0 -3px 10px;
+      letter-spacing:.2px}
+.msg.me .time{opacity:.85}
+.msg.sys .time{display:none}
 
 /* بطاقات داخل الفقاعات */
 .bub h4{margin:0 0 8px; font-size:13.5px}
@@ -325,8 +339,8 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
   backdrop-filter:blur(8px);
 }
 #composer{
-  display:flex; gap:8px; align-items:center; margin:8px 12px calc(12px + env(safe-area-inset-bottom));
-  padding:6px 6px 6px 10px; border-radius:26px;
+  display:flex; gap:8px; align-items:center; margin:8px 12px calc(10px + env(safe-area-inset-bottom));
+  padding:5px 5px 5px 10px; border-radius:999px;
   background:var(--glass-2); backdrop-filter:blur(14px);
   border:1px solid var(--brd); box-shadow:var(--sh-sm);
 }
@@ -336,7 +350,7 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 }
 #inp::placeholder{color:var(--mut)}
 #send{
-  width:44px; height:44px; flex:none; border:0; border-radius:50%; cursor:pointer;
+  width:46px; height:46px; flex:none; border:0; border-radius:50%; cursor:pointer;
   background:linear-gradient(135deg,var(--me1),var(--me2)); color:#fff; font-size:16px;
   box-shadow:0 6px 16px rgba(124,92,255,.4); transition:transform .15s;
 }

@@ -178,7 +178,9 @@ async function loadThreads() {
     row.append(cell);
   }
   for (const t of THREADS) {
-    const row = el('div', 't-row' + (t.revoked_at ? ' revoked' : ''));
+    const unread0 = t.last_id - (READ[t.id] || 0);
+    const row = el('div', 't-row' + (t.revoked_at ? ' revoked' : '')
+      + (unread0 > 0 ? ' unred' : ''));
     row.setAttribute('role', 'listitem');
     row.dataset.id = t.id;
     const av = el('span', 'avatar ' + t.grad, t.emoji);
@@ -222,20 +224,32 @@ function append(msgs) {
     box.append(render(m));
     LAST[m.thread] = Math.max(LAST[m.thread] || 0, m.id);
   }
+  regroup(box);
   box.scrollTop = box.scrollHeight;
+}
+
+/* لغة تلجرام: الذيل لآخر رسالة في السطر فقط، والزوايا القريبة 6px للمجمعة */
+function regroup(box) {
+  const kids = [...box.children];
+  const sideOf = k => k.classList.contains('sys') ? null
+    : (k.classList.contains('me') ? 'me' : 'ag');
+  for (let i = 0; i < kids.length; i++) {
+    const side = sideOf(kids[i]);
+    if (!side) continue;               /* شريحة التاريخ تقطع السطر */
+    kids[i].classList.toggle('gnx', sideOf(kids[i + 1]) === side);
+    kids[i].classList.toggle('gpv', sideOf(kids[i - 1]) === side);
+  }
 }
 
 /* ── رسم الرسائل حسب نوعها ── */
 function render(m) {
   const wrap = el('div', 'msg ' + (m.sender === 'user' ? 'me'
     : m.sender === 'system' ? 'sys' : 'ag'));
-  if (m.sender === 'agent') {
-    const t = THREADS.find(x => x.id === m.thread) || {};
-    wrap.append(el('span', 'avatar ' + (t.grad || 'g1'), t.emoji || '🧭'));
-  }
   const b = el('div', 'bub');
   KIND[m.kind] ? KIND[m.kind](b, m.payload, m) : (b.textContent = m.payload.text || m.kind);
-  b.append(el('span', 'time', hhmm(m.created_at)));
+  /* الوقت — والصحّان لحظيًا — داخل الفقاعة كما في التطبيقات الحقيقية */
+  b.append(el('span', 'time', m.sender === 'user'
+    ? hhmm(m.created_at) + '\u00A0\u2713\u2713' : hhmm(m.created_at)));
   wrap.append(b);
   return wrap;
 }
