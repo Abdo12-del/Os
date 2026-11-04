@@ -152,7 +152,8 @@ CREATE TABLE IF NOT EXISTS agent_tokens (
 -- GRANT USAGE, SELECT ON SEQUENCE pending_actions_id_seq TO agent_accountant_read;
 -- GRANT USAGE, SELECT ON SEQUENCE agent_audit_log_id_seq TO agent_accountant_read;
 --
--- ⚠️ المحاسب يستعمل معرّف الطالب لا اسمه (القاعدة 13). أعطه view:
+-- ⚠️ المحاسب يستعمل معرّف الطالب لا اسمه (قاعدة المحاسب 13 في 07-prompts/04-accountant.md،
+--    وأصلها القاعدة 6 في 05-rules.md: خصوصية الطفل). أعطه view:
 -- CREATE VIEW v_finance_payments AS
 --   SELECT p.id, p.student_id, p.amount, p.currency, p.method, p.paid_at, p.reference
 --   FROM payments p;                  -- بلا اسم الطفل، بلا هاتف ولي الأمر

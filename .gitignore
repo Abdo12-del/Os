@@ -6,6 +6,7 @@
 
 # بيانات الطلبة والأولياء والدفعات والتقارير المالية — لا تدخل Git أبدًا
 exports/
+!exports/README.md
 finance/report-*.md
 finance/*.csv
 *.csv
