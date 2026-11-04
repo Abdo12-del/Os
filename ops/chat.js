@@ -17,8 +17,8 @@ const el = (tag, cls, txt) => {
 const hhmm = iso => (iso || '').slice(11, 16);
 /* أيقونة كل دور — بلاطات وبطاقات ورأس المحادثة */
 const T_ICON = {
-  head_of_ops: 'i-comp', accountant: 'i-calc',
-  marketing: 'i-mega', lead_nurturer: 'i-chats',
+  head_of_ops: 'comp', accountant: 'calc',
+  marketing: 'mega', lead_nurturer: 'chats',
 };
 /* أيقونة متجهية من الطقم — لا إيموجي في الواجهة */
 const ic = n => {
@@ -196,7 +196,7 @@ async function loadThreads() {
     const cell = el('button', 'tile');
     cell.title = t.name;
     const icn = el('span', 'tile-ic ' + t.grad);
-    icn.append(ic(T_ICON[t.id] || 'i-chat'));
+    icn.append(ic(T_ICON[t.id] || 'chat'));
     if (unread > 0 && t.id !== CUR)
       icn.append(el('span', 'badge' + (t.pending_count > 0 ? ' red' : ''),
         String(unread)));
@@ -213,7 +213,7 @@ async function loadThreads() {
     row.setAttribute('role', 'listitem');
     row.dataset.id = t.id;
     const av = el('span', 'tav ' + t.grad);
-    av.append(ic(T_ICON[t.id] || 'i-chat'));
+    av.append(ic(T_ICON[t.id] || 'chat'));
     const tx = el('div', 'tx');
     const nm = el('div', 'nm');
     nm.append(el('b', null, t.name), el('time', null, hhmm(t.last_at)));
@@ -234,7 +234,7 @@ async function openThread(id) {
   $('#pane-chat').classList.remove('hidden');
   const hav = $('#head-av');
   hav.textContent = '';
-  hav.append(ic(T_ICON[t.id] || 'i-chat'));
+  hav.append(ic(T_ICON[t.id] || 'chat'));
   $('#head-av').className = 'avatar sm ' + (t.grad || 'g1');
   $('#head-name').textContent = t.name || id;
   $('#head-status').textContent = t.revoked_at
@@ -613,7 +613,7 @@ if (nav === 'home') {
   location.href = '/console#pending';        /* طابور القرارات المؤجّلة = جدولك */
 } else if (nav === 'alerts') {
   const rows = THREADS.filter(t => t.pending_count > 0).map(t => {
-    const r = shRow(T_ICON[t.id] || 'i-chat', t.name);
+    const r = shRow(T_ICON[t.id] || 'chat', t.name);
     r.append(el('span', 'cnt red', String(t.pending_count)));
     r.onclick = () => { closeSheet(); openThread(t.id); };
     return r;

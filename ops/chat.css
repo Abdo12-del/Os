@@ -105,14 +105,15 @@ body{
 /* بانر الترحيب بالتميمة — لغة المرجع */
 .hero{
   position:relative; overflow:hidden; border-radius:26px; padding:18px 18px 14px;
-  background:linear-gradient(150deg,#bfe3ff 0%,#dff1ff 55%,#eaf4ff 100%);
+  background:
+    radial-gradient(120% 95% at 10% 0%, rgba(255,255,255,.6), transparent 58%),
+    #dff1ff;
   display:flex; align-items:flex-end; gap:8px; min-height:158px;
   box-shadow:var(--sh-sm);
 }
 .hero .mascot{
-  width:138px; flex:none; align-self:flex-end; pointer-events:none;
-  margin-bottom:-14px; margin-inline-end:-10px;
-  filter:drop-shadow(0 8px 18px rgba(20,80,140,.25));
+  width:126px; flex:none; align-self:flex-end; pointer-events:none;
+  margin-bottom:-12px; margin-inline-end:-4px; border-radius:26px;
 }
 .hero-txt{flex:1; min-width:0; padding-bottom:6px}
 .hero-txt h2{margin:0 0 6px; font-size:21px; font-weight:800; color:#0b3552; line-height:1.4}
@@ -122,7 +123,11 @@ body{
   font-size:11px; font-weight:800; color:#0e7ec7;
   background:rgba(255,255,255,.8); padding:4px 12px; border-radius:999px;
 }
-html[data-theme="dark"] .hero{background:linear-gradient(150deg,#0e2c44,#123b5c 60%,#12283e)}
+html[data-theme="dark"] .hero{background:
+    radial-gradient(120% 95% at 10% 0%, rgba(124,199,255,.16), transparent 58%),
+    #10293e}
+html[data-theme="dark"] .hero .mascot{box-shadow:0 0 0 1px rgba(124,199,255,.25),
+    0 10px 26px rgba(0,0,0,.35)}
 html[data-theme="dark"] .hero-txt h2{color:#e8f4ff}
 html[data-theme="dark"] .hero-sub{color:#9fc3dc}
 html[data-theme="dark"] .hero-count{background:rgba(255,255,255,.1); color:#7cc7ff}
