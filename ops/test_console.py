@@ -256,8 +256,8 @@ def main():
 
     code, res = post('/api/chat', {'thread': 'head_of_ops', 'text': 'شغّل الوكلاء'})
     txt = ' '.join(m['payload'].get('text', '') for m in res.get('messages', []))
-    check('«شغّل الوكلاء» يشغّل ويرسل ملخصًا لرئيس العمليات',
-          code == 200 and 'شغّلتُ الوكلاء' in txt, txt[:50])
+    check('«شغّل الوكلاء» يشغّل ويرسل ملخصًا مركَّبًا لرئيس العمليات',
+          code == 200 and 'شغّلتُ' in txt and 'وكلاء' in txt, txt[:50])
     code, res = get('/api/messages?thread=accountant')
     nprop = sum(1 for m in res['messages'] if m['kind'] == 'proposal')
     check('كل اقتراح وصل فقاعة في محادثة وكيله', nprop >= 1, f'{nprop} فقاعة')
@@ -404,6 +404,38 @@ def main():
           and not any(m['source'].endswith(_os.path.basename(res['path']))
                       for m in get('/api/memory?all=1')[1]['memories']),
           res.get('path', ''))
+
+    # ── ١٥) اللسان: تركيب الجمل ومطابقة العدد ──
+    print('\n[١٥] اللسان — PyArabic مدمج + محرّك مطابقة، لا قوائم مكسورة')
+    import nlg as _nlg
+    check('PyArabic مدمج ويعمل (linuxscout/pyarabic)', _nlg.HAS_PYARABIC)
+    cases = [
+        (_nlg.counted(3, 'يوم', 'أيام', 'يومان', 'm'), 'ثلاثة أيام'),
+        (_nlg.counted(2, 'يوم', 'أيام', 'يومان', 'm'), 'يومان'),
+        (_nlg.counted(11, 'يوم', 'أيام', 'يومان', 'm'), 'أحد عشر يومًا'),
+        (_nlg.counted(5, 'دفعة', 'دفعات', 'دفعتان', 'f'), 'خمس دفعات'),
+        (_nlg.counted(12, 'دفعة', 'دفعات', 'دفعتان', 'f'), 'اثنتا عشرة دفعةً'),
+        (_nlg.money(34500), 'أربعة وثلاثون ألفًا وخمسمئة دينار'),
+        (_nlg.money(3000), 'ثلاثة آلاف دينار'),
+        (_nlg.counted(1, 'اقتراح', 'اقتراحات', 'اقتراحان', 'm'), 'اقتراحًا واحدًا'),
+        (_nlg.counted(16, 'اقتراح', 'اقتراحات', 'اقتراحان', 'm'), 'ستة عشر اقتراحًا'),
+    ]
+    bad = [f'{g} ≠ {w}' for g, w in cases if g != w]
+    check('مطابقة العدد والمعدود والإعراب', not bad, '؛ '.join(bad))
+    check('الوصل الخطابي: لكن/لذلك', '، لكن ' in _nlg.CONN.values().__str__()
+          and _nlg.compose([('add', 'أ'), ('cause', 'ب')]).endswith('؛ لذلك ب.'))
+
+    code, res = post('/api/chat', {'thread': 'accountant', 'text': 'المطابقة'})
+    txt = ' '.join(m['payload'].get('text', '') for m in res['messages']
+                   if m['kind'] == 'text')
+    check('كلام المحاسب جملة متماسكة بأعداد مكتوبة',
+          'طابقتُ المرجعين' in txt and 'حالات' in txt and 'دينار' in txt,
+          txt[:70])
+    check('لا رقم خامًا حيث يجب الكلام', '34500' not in txt and '500 دج' not in txt)
+    code, res = post('/api/chat', {'thread': 'head_of_ops', 'text': 'شغّل الوكلاء'})
+    txt = ' '.join(m['payload'].get('text', '') for m in res['messages'])
+    check('ملخص التشغيل فقرة لا قائمة', 'شغّلتُ' in txt and 'اقتراحًا' in txt,
+          txt[:60])
 
     # ── الحصيلة ──
     ok = sum(1 for _, o, _ in RESULTS if o)

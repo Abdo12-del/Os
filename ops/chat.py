@@ -25,6 +25,7 @@ import unicodedata
 import agents
 import engine
 import memory
+import nlg
 
 # ── جهات الاتصال ─────────────────────────────────────────────
 THREADS = [
@@ -204,11 +205,9 @@ def _do_run(con, thread):
     for s in rep['skipped']:
         t = BY_ID.get(s['agent'])
         lines.append(f"• {t['name'] if t else s['agent']}: ⛔ {s['reason']}")
-    _say(con, 'head_of_ops',
-         'شغّلتُ الوكلاء الأربعة.\n' + '\n'.join(lines) +
-         f"\nالمجموع {rep['proposed']} اقتراحًا — كل واحد وصل فقاعة في محادثة وكيله."
-         + (f"\n⚠️ تعطّل: {rep['broken']}" if rep['broken'] else
-            '\nلا شيء تعطّل.'))
+    _say(con, 'head_of_ops', nlg.prose_run(
+            rep, {t['id']: t['name'] for t in THREADS})
+         + (f'\n⚠️ تعطّل: {rep["broken"]}' if rep['broken'] else ''))
     # كل اقتراح معلّق لم يُرسل بعد → فقاعة في محادثة وكيله
     sent = 0
     for row in engine.pending(con, 'pending'):
@@ -220,7 +219,8 @@ def _do_run(con, thread):
         _post_pending(con, row['agent'], row)
         sent += 1
     if sent:
-        _say(con, thread, f'وصلت {sent} فقاعة اقتراح — زرّا موافقة/رفض تحت كل واحدة.')
+        _say(con, thread, f'وصلت {nlg.counted(sent, "فقاعة", "فقاعات", "فقاعتان", "f")}'
+                          ' اقتراح — زرّا موافقة/رفض تحت كل واحدة.')
     return rep
 
 
@@ -233,9 +233,7 @@ def _do_brief(con, thread):
 def _do_reconcile(con, thread):
     r = agents.reconcile(con)
     post(con, thread, 'agent', 'cases', r)
-    _say(con, thread,
-         f"الفرق الصافي {r['net_difference']} دج — وتحته {r['case_count']} حالات "
-         'باتجاهين متعاكسين. لا أحكم على المجموع وحده.')
+    _say(con, thread, nlg.prose_reconcile(r))
 
 
 def _do_teacher(con, thread, tid=None):
@@ -249,9 +247,10 @@ def _do_teacher(con, thread, tid=None):
     st = memory.apply_decision_to_statement(con, agents.teacher_statement(con, tid))
     post(con, thread, 'agent', 'teacher', st)
     if st.get('basis') is None:
-        _say(con, thread,
-             'لا أحسب المستند بلا أساس محسوم — هذا ليس تقصيرًا، هذا هو الأمان.\n'
-             f"الفارق بين الأسس الثلاثة {st.get('spread_dzd')} دج: قرارك أنت، لا تخميني.")
+        _say(con, thread, nlg.prose_teacher(st)
+             + '\n(هذا ليس تقصيرًا — هذا هو الأمان: لا رقم على أساس غير محسوم.)')
+    else:
+        _say(con, thread, nlg.prose_teacher(st))
 
 
 def _do_funnel(con, thread):
@@ -262,10 +261,7 @@ def _do_funnel(con, thread):
 def _do_leads(con, thread):
     q = agents.lead_nurturer_queue(con)
     post(con, thread, 'agent', 'leads', q)
-    _say(con, thread,
-         f"{q['never_replied']} من {q['total_leads']} لم يُرد عليهم أبدًا — "
-         'أكبر تسرّب عندنا قبل أي إعلان جديد.\nكل مسوّدة من الدليل؛ '
-         'والإرسال يبقى يدك.')
+    _say(con, thread, nlg.prose_leads(q))
 
 
 def _do_pending(con, thread):
@@ -432,8 +428,7 @@ def handle(con, thread, text):
         if r.get('outcome') == 'refused':
             _say(con, thread, r['error'])
         else:
-            _say(con, thread, f"رفضتُ #{aid} وسجّلت سببك: «{text}».\n"
-                              'السبب هو الطريقة الوحيدة التي أتحسّن بها — شكرًا.')
+            _say(con, thread, nlg.prose_reject(aid, text))
         return _since(con, before)
 
     # ١) رفض — بالسبب أو أسأل عنه
@@ -458,7 +453,7 @@ def handle(con, thread, text):
         if r.get('outcome') == 'refused':
             _say(con, thread, r['error'])
         else:
-            _say(con, thread, f"رفضتُ #{aid} وسجّلت سببك: «{rest}».")
+            _say(con, thread, nlg.prose_reject(aid, rest))
         return _since(con, before)
 
     # ٢) موافقة
@@ -569,13 +564,11 @@ def _approve_msg(con, thread, aid):
         res = r.get('result', {})
         ref = res.get('inserted') or res.get('updated') or res.get('closed') \
             or res.get('expense_id') or res.get('lead_id') or '—'
-        _say(con, thread, f"✅ نُفّذ #{aid} في تطبيقك — المرجع {ref}.\n"
-                          'سُجّل في التدقيق باسمك.')
+        _say(con, thread, nlg.prose_approve_exec(aid, ref))
     elif r.get('manual_instruction'):
         _say(con, thread,
-             f"سجّلت موافقتك على #{aid} ({row['action_type']}).\n"
-             '⚠️ لا يوجد تنفيذ آلي لهذا — ولن يوجد: إجراء موجّه لولي أمر أو للعامة.\n'
-             + r['manual_instruction'], manual=True,
+             nlg.prose_approve_manual(aid, row['action_type'])
+             + '\n' + r['manual_instruction'], manual=True,
              draft=(json.loads(row['payload']) or {}).get('text'))
     else:
         _say(con, thread, f"سجّلت موافقتك على #{aid}، لكن: {r.get('error')}")
@@ -595,7 +588,7 @@ def apply_action(con, thread, op, **kw):
             if r.get('outcome') == 'refused':
                 _say(con, thread, r['error'])
             else:
-                _say(con, thread, f"رفضتُ #{kw['id']} وسجّلت سببك: «{reason}».")
+                _say(con, thread, nlg.prose_reject(int(kw['id']), reason))
     elif op == 'revoke':
         _do_revoke(con, thread, kw['agent'])
     elif op == 'restore':
