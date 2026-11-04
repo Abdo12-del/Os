@@ -14,7 +14,25 @@ import urllib.error
 import urllib.request
 
 BASE = os.environ.get('OPS_URL', 'http://127.0.0.1:8080')
+DB = os.environ.get('OPS_DB', os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'ops.db'))
 RESULTS = []
+
+
+def reset_db():
+    """
+    تصفير القاعدة قبل كل تشغيل.
+
+    بدون هذا، المجموعة **لا تُعاد**: التشغيل الأول يوافق على تصحيحات
+    correct_payment فتُنفَّذ وتختفي من الطابور، فيرسب التشغيل الثاني.
+    الخادم يفتح اتصالًا لكل طلب ولا يحتفظ بشيء، فحذف الملف كافٍ —
+    أول طلب بعده يعيد البناء والزرع.
+    """
+    for suffix in ('', '-wal', '-shm'):
+        try:
+            os.remove(DB + suffix)
+        except FileNotFoundError:
+            pass
 
 
 def get(path):
@@ -50,6 +68,8 @@ def main():
     print('=' * 68)
     print(' اختبار مركز العمليات — 12 اختبارًا')
     print('=' * 68)
+    reset_db()
+    print('\n  (صُفّرت القاعدة — المجموعة قابلة للإعادة)')
 
     # ── 1) الواجهة تُقدَّم ──
     print('\n[١] الواجهة')
