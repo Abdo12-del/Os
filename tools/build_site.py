@@ -72,6 +72,7 @@ GROUPS = [
         ('memory/facts-business.md', 'تدريب: حقائق العمل'),
         ('memory/decisions-open.md', 'تدريب: القرارات المفتوحة'),
         ('memory/lessons-seed.md', 'تدريب: الدروس الأولى'),
+        ('memory/synonyms.md', 'تدريب: عنقود المترادفات — الفهم الدلالي'),
     ]),
     ('البنية التقنية (أنت المبرمج)', [
         ('tech/01-schema.sql', 'مخطط قاعدة البيانات'),
@@ -287,21 +288,24 @@ def render_list(items):
 # ─────────────────────────────────────────────────────────────
 CSS = """
 :root{
-  --bg:#fbfaf8; --fg:#1c1a17; --mut:#6b6560; --line:#e4ddd4;
-  --card:#fff; --acc:#8c5a2b; --acc-bg:#faf3ea;
-  --red:#b3261e; --red-bg:#fdf0ef; --amber:#8a6100; --amber-bg:#fdf6e3;
-  --green:#2f6b3a; --green-bg:#eef6ef;
+  --bg:#eef0fb; --fg:#252838; --mut:#7c8098; --line:rgba(120,110,200,.16);
+  --card:rgba(255,255,255,.66); --acc:#7c5cff; --acc-bg:rgba(124,92,255,.10);
+  --red:#e11d48; --red-bg:rgba(225,29,72,.10); --amber:#b45309; --amber-bg:rgba(217,119,6,.12);
+  --green:#15803d; --green-bg:rgba(22,163,74,.12);
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#14120f;--fg:#ece7e0;--mut:#9c948b;--line:#2e2a25;
-        --card:#1c1916;--acc:#d9a05b;--acc-bg:#241e16;
-        --red:#f2a49c;--red-bg:#2a1a18;--amber:#e8c877;--amber-bg:#27210f;
-        --green:#93cf9c;--green-bg:#16241a;}
+  :root{--bg:#12142b;--fg:#eceaf8;--mut:#9a9dbb;--line:rgba(255,255,255,.10);
+        --card:rgba(24,26,52,.66);--acc:#a78bfa;--acc-bg:rgba(124,92,255,.16);
+        --red:#fda4af;--red-bg:rgba(244,63,94,.16);--amber:#fcd34d;--amber-bg:rgba(245,158,11,.16);
+        --green:#86efac;--green-bg:rgba(34,197,94,.16);}
+  body{background:linear-gradient(150deg,#12142b,#1a1030 55%,#0e1c33)}
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
-  margin:0;background:var(--bg);color:var(--fg);
+  margin:0;color:var(--fg);
+  background:linear-gradient(150deg,#eef0fb,#f7eef8 55%,#eaf6ff);
+  background-attachment:fixed;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Arabic",
               "Noto Naskh Arabic",Tahoma,"Geeza Pro",sans-serif;
   font-size:17px;line-height:1.85;
@@ -313,7 +317,9 @@ a:hover{border-bottom-color:var(--acc)}
 .wrap{display:flex;min-height:100vh;align-items:flex-start}
 nav{
   width:17rem;flex:none;position:sticky;top:0;height:100vh;overflow-y:auto;
-  background:var(--card);border-inline-end:1px solid var(--line);padding:1.25rem 1rem 3rem;
+  background:var(--card);backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  border-inline-end:1px solid var(--line);padding:1.25rem 1rem 3rem;
 }
 main{flex:1;min-width:0;padding:2rem clamp(1rem,4vw,3.5rem) 6rem}
 .doc{max-width:46rem;margin:0 auto}
@@ -398,7 +404,9 @@ tbody tr:hover{background:var(--acc-bg)}
 @media (max-width:760px){
   .topbar{
     display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:20;
-    background:var(--card);border-bottom:1px solid var(--line);
+    background:var(--card);backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
     padding:.6rem 1rem;margin:-1.5rem -1rem 1.2rem;
   }
   .topbar b{font-size:.9rem;flex:1}
@@ -406,21 +414,30 @@ tbody tr:hover{background:var(--acc-bg)}
 }
 
 /* ── فهرس الصفحة ── */
-.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;
+.toc{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;
      padding:.85rem 1.1rem;margin:1.4rem 0;font-size:.88rem}
 .toc b{display:block;margin-bottom:.4rem;font-size:.8rem;color:var(--mut)}
 .toc a{display:inline-block;margin-inline-end:.9rem;line-height:2}
 .toc .l3{padding-inline-start:1rem;color:var(--mut)}
 
 /* ── الصفحة الرئيسية ── */
-.hero{background:var(--card);border:1px solid var(--line);border-radius:14px;
-      padding:1.5rem;margin-bottom:1.8rem}
+.hero{background:var(--card);backdrop-filter:blur(16px) saturate(1.3);
+      -webkit-backdrop-filter:blur(16px) saturate(1.3);
+      border:1px solid var(--line);border-radius:24px;
+      padding:1.6rem;margin-bottom:1.8rem;
+      box-shadow:0 2px 6px rgba(40,35,90,.06),0 14px 34px rgba(40,35,90,.10)}
+.cta{display:inline-block;margin:.5rem 0 .3rem;padding:.75rem 1.5rem;border-radius:999px;
+     background:linear-gradient(135deg,#7c5cff,#a78bfa);color:#fff !important;
+     font-weight:700;border-bottom:0 !important;font-size:1rem;
+     box-shadow:0 6px 18px rgba(124,92,255,.35)}
+.cta:hover{filter:brightness(1.07)}
 .hero h1{margin-bottom:.5rem}
 .badge{display:inline-block;background:var(--acc-bg);color:var(--acc);
        border-radius:99px;padding:.15rem .7rem;font-size:.75rem;font-weight:700;
        margin-inline-end:.4rem;margin-bottom:.4rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.8rem;margin:1.2rem 0}
-.gcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem}
+.gcard{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--line);
+       border-radius:18px;padding:.9rem 1rem}
 .gcard h3{margin:.1rem 0 .5rem;font-size:.98rem}
 .gcard a{display:block;font-size:.86rem;padding:.18rem 0;border-bottom:0;line-height:1.6}
 .warn{background:var(--red-bg);color:var(--red);border-inline-start:3px solid var(--red);
@@ -577,6 +594,11 @@ def main():
         for name, content in built:
             with open(os.path.join(OUT, name), 'w', encoding='utf-8') as f:
                 f.write(content)
+        # واجهة الدردشة تُنسخ كما هي: على استضافة ثابتة تعمل بوضع معاينة
+        # بعينة بيانات من المستودع، وعلى جهازك بخادم حيّ تصير حقيقية.
+        import shutil
+        for f in ('chat.html', 'chat.css', 'chat.js'):
+            shutil.copy(os.path.join(ROOT, 'ops', f), os.path.join(OUT, f))
     print(f'✅ {len(built)} صفحة → {os.path.relpath(OUT, ROOT)}/')
     return 0
 
@@ -612,7 +634,11 @@ def index_page(stamp):
 لا شيء يخرج لولي أمر أو يُنشر على منصة بدونك.</div>
 <p><span class="badge">46 ملفًا</span><span class="badge">8 أنظمة تشغيل</span>
 <span class="badge">14 وكيلًا</span><span class="badge">11 قاعدة</span>
-<span class="badge">31 اختبار قبول</span></p>
+<span class="badge">85/85 اختبارًا</span></p>
+<p><a class="cta" href="chat.html">💬 افتح واجهة الدردشة — معاينة حيّة بعينة بيانات</a></p>
+<p style="font-size:.85rem;color:var(--mut)">على الاستضافة الثابتة تعمل الواجهة بوضع
+معاينة بعينة من بيانات المستودع. على جهازك تشغّل الخادم الحي:
+<code>python3 ops/server.py</code> ثم تفتح نفس الشاشة فتصير حقيقية.</p>
 </div>
 
 <h2>الساعة الأولى</h2>
@@ -629,10 +655,11 @@ def index_page(stamp):
 في <a href="{out_name('OPEN-QUESTIONS.md')}"><strong>OPEN-QUESTIONS</strong></a>.
 أهمها: نسبة الأستاذ على المحصَّل أم المستحق.</p>
 
-<h2>هذا الموقع ليس التطبيق</h2>
-<p>هذه وثائق تشغيل تُقرأ. لا وكيل يعمل هنا، ولا قاعدة بيانات متصلة، ولا زر موافقة ينفّذ شيئًا.
-الوكلاء تُبنى في Claude بمشروع + نظام التشغيل المنسوخ من
-<a href="{out_name('07-prompts/00-head-of-operations.md')}">مجلد الأنظمة</a>.</p>
+<h2>هذا الموقع والواجهة الحيّة</h2>
+<p>هذه وثائق تشغيل تُقرأ، وفوقها زر الواجهة: messenger زجاجي بكل الوكلاء
+والموافقات والذاكرة والبحث. على الاستضافة الثابتة يفتح بوضع معاينة بعينة
+بيانات؛ والتشغيل الحقيقي على جهازك: <code>python3 ops/server.py</code> —
+خادم بايثون بلا تبعيات، بقاعدة SQLite وتدقيق لا يُمحى.</p>
 """
     return PAGE.format(
         title=html.escape('نظام تشغيل الأكاديمية — AI Workforce OS'),

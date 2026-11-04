@@ -264,6 +264,16 @@ html[data-theme="dark"] .grad{
 }
 #send:hover{transform:scale(1.06)}
 
+/* راية وضع المعاينة (استضافة ثابتة بلا خادم) */
+.demo-flag{
+  position:fixed; top:10px; inset-inline:12px; z-index:50; margin:0 auto;
+  max-width:560px; padding:9px 16px; border-radius:999px; text-align:center;
+  font-size:12px; color:#7c2d12; background:rgba(255,244,222,.9);
+  border:1px solid rgba(217,119,6,.4); backdrop-filter:blur(10px);
+  box-shadow:var(--sh-sm);
+}
+html[data-theme="dark"] .demo-flag{background:rgba(58,36,16,.9); color:#fdba74}
+
 /* أشرطة تمرير رفيعة */
 #msgs::-webkit-scrollbar,#threads::-webkit-scrollbar{width:6px}
 #msgs::-webkit-scrollbar-thumb,#threads::-webkit-scrollbar-thumb{
