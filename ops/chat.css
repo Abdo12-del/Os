@@ -34,6 +34,14 @@ html[data-theme="dark"]{
 }
 
 *{box-sizing:border-box}
+/* طقم أيقونات متجهية واحد: خط 1.8 بأطراف مستديرة — لغة التطبيقات الحقيقية */
+.ic{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8;
+    stroke-linecap:round; stroke-linejoin:round; vertical-align:-4px; flex:none}
+.icw{display:inline-flex; align-items:center}
+.s12{width:12px; height:12px; vertical-align:-1.5px}
+.s15{width:15px; height:15px; vertical-align:-2.5px}
+.s20{width:20px; height:20px}
+.s22{width:22px; height:22px}
 html,body{height:100%}
 @supports not ((backdrop-filter:blur(4px)) or (-webkit-backdrop-filter:blur(4px))){
   :root{--glass:rgba(255,255,255,.94); --glass-2:rgba(255,255,255,.88);
@@ -108,7 +116,8 @@ html[data-theme="dark"] .grad{
 .agent-cell:hover{transform:translateY(-2px)}
 .agent-orb{
   width:58px; height:58px; border-radius:50%; position:relative;
-  display:grid; place-items:center; font-size:27px; color:#fff;
+  display:grid; place-items:center; font-size:16px; font-weight:800;
+  letter-spacing:.5px; color:#fff;
   box-shadow:0 0 0 3px rgba(255,255,255,.85), 0 8px 18px rgba(40,20,90,.35);
 }
 .agent-orb.off{filter:grayscale(.7); opacity:.7}
@@ -122,9 +131,11 @@ html[data-theme="dark"] .grad{
   display:flex; align-items:center; justify-content:space-between;
   padding:12px 16px 4px;
 }
-.sec-head b{font-size:13.5px; font-weight:800}
+.sec-head b{font-size:13.5px; font-weight:800; display:flex; align-items:center; gap:6px}
+.sec-head b .ic{color:var(--me1)}
 .sec-pill{
   border:0; cursor:pointer; font:inherit; font-size:11px; font-weight:700;
+  display:inline-flex; align-items:center; gap:5px;
   padding:5px 12px; border-radius:999px; color:var(--me1);
   background:rgba(124,92,255,.12); border:1px solid rgba(124,92,255,.25);
 }
@@ -138,7 +149,7 @@ html[data-theme="dark"] .grad{
 .me p{margin:0; font-size:11.5px; color:var(--mut)}
 .head-acts{display:flex; gap:8px}
 .head-acts a,.head-acts button{
-  text-decoration:none; color:inherit; font-size:16px; width:38px; height:38px;
+  text-decoration:none; color:inherit; width:38px; height:38px;
   display:grid; place-items:center; border:1px solid var(--brd); border-radius:13px;
   background:var(--chip); backdrop-filter:blur(8px); cursor:pointer;
   box-shadow:var(--sh-sm); transition:transform .15s;
@@ -147,7 +158,8 @@ html[data-theme="dark"] .grad{
 
 .avatar{
   width:52px; height:52px; border-radius:50%; flex:none; position:relative;
-  display:grid; place-items:center; font-size:24px; color:#fff;
+  display:grid; place-items:center; font-size:17px; font-weight:800;
+  letter-spacing:.5px; color:#fff;
   box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 6px 16px rgba(40,35,90,.22);
 }
 html[data-theme="dark"] .avatar{
@@ -159,8 +171,8 @@ html[data-theme="dark"] .avatar{
   box-shadow:0 0 0 2.5px var(--bg1);
 }
 .avatar.founder::after{display:none}
-.avatar.sm{width:40px; height:40px; font-size:19px}
-.avatar.founder{background:linear-gradient(135deg,#4b4f86,#7a55b0)}
+.avatar.sm{width:40px; height:40px; font-size:14px}
+.avatar.founder{background:linear-gradient(135deg,#4b4f86,#7a55b0); font-size:20px}
 .g1{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
 .g2{background:linear-gradient(135deg,#0ea5a4,#22c55e)}
 .g3{background:linear-gradient(135deg,#f472b6,#fb923c)}
@@ -180,7 +192,7 @@ html[data-theme="dark"] .avatar{
   content:""; position:absolute; inset-inline-start:84px; inset-inline-end:16px;
   bottom:0; height:1px; background:var(--brd-soft);
 }
-.t-row .avatar{width:54px; height:54px; font-size:25px; box-shadow:none}
+.t-row .avatar{width:54px; height:54px; font-size:17px; box-shadow:none}
 .t-row .tx{flex:1; min-width:0}
 .t-row .nm{display:flex; justify-content:space-between; gap:8px; align-items:baseline}
 .t-row .nm b{font-size:16px; font-weight:600}
@@ -199,11 +211,12 @@ html[data-theme="dark"] .t-row.unred .nm time{color:#4ade80}
 }
 .revoked{opacity:.55}
 .revoked .avatar::after{background:#94a3b8}
-.revoked .nm b::after{content:" ⛔ موقوف"; color:var(--bad); font-size:11px}
+.revoked .nm b::after{content:" · موقوف"; color:var(--bad); font-size:11px}
 .foot-note{padding:10px 16px calc(12px + env(safe-area-inset-bottom)/2);
            font-size:10.5px; color:var(--mut); text-align:center;
            border-top:1px solid var(--brd-soft)}
 .foot-note a{color:var(--me1); font-weight:700; text-decoration:none}
+.foot-note .ic{color:var(--mut)}
 html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 
 /* ── المحادثة ── */
@@ -220,13 +233,15 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
   border-bottom:1px solid var(--brd-soft); background:var(--glass-2);
   backdrop-filter:blur(10px); position:sticky; top:0; z-index:5;
 }
-#back{border:0; background:none; font-size:24px; color:var(--mut); cursor:pointer;
-      padding:2px 8px; line-height:1}
+#back{border:0; background:none; color:var(--mut); cursor:pointer;
+      padding:2px 6px; line-height:1; display:grid; place-items:center}
 .who{flex:1; min-width:0}
 .who b{display:block; font-size:16px; font-weight:700}
 .who span{font-size:12px; color:var(--mut)}
 #revoke-btn{border:1px solid var(--brd-soft); background:var(--chip); border-radius:12px;
-            width:36px; height:36px; cursor:pointer; font-size:15px}
+            width:36px; height:36px; cursor:pointer; display:grid; place-items:center;
+            color:var(--mut)}
+#revoke-btn .ic{width:16px; height:16px}
 
 #msgs{flex:1; overflow-y:auto; padding:14px 14px 8px; scroll-behavior:smooth}
 .msg{display:flex; margin:0 0 10px; gap:8px; align-items:flex-end;
@@ -262,12 +277,15 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
               color:var(--mut); font-size:11px; text-align:center; max-width:90%;
               border-radius:999px; padding:4px 14px; backdrop-filter:blur(6px)}
 .time{float:left; font-size:10px; opacity:.7; margin:9px 0 -3px 10px;
-      letter-spacing:.2px}
+      letter-spacing:.2px; display:inline-flex; align-items:center; gap:3px}
+.time .ic{width:14px; height:14px; stroke-width:2.2}
 .msg.me .time{opacity:.85}
 .msg.sys .time{display:none}
 
 /* بطاقات داخل الفقاعات */
-.bub h4{margin:0 0 8px; font-size:13.5px}
+.bub h4{margin:0 0 8px; font-size:13.5px; display:flex; align-items:center; gap:6px}
+.bub h4 .ic{width:15px; height:15px; color:var(--me1)}
+.msg.me .bub h4 .ic{color:#fff}
 .kv{display:flex; justify-content:space-between; gap:10px; font-size:13px;
     padding:4px 2px; border-bottom:1px dashed var(--brd-soft)}
 .kv:last-child{border-bottom:0}
@@ -292,7 +310,9 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 .warnbox{
   margin-top:8px; padding:8px 11px; border-radius:14px; font-size:12.5px;
   background:var(--warn-bg); color:var(--warn); border:1px solid transparent;
+  display:flex; align-items:flex-start; gap:6px;
 }
+.warnbox .ic{width:14px; height:14px; margin-top:3px}
 .draft{
   margin-top:8px; padding:9px 11px; border-radius:14px; font-size:13px;
   background:var(--chip); border:1px dashed var(--brd-soft); white-space:pre-wrap;
@@ -301,8 +321,9 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 .acts button{
   border:0; cursor:pointer; font:inherit; font-size:13px; font-weight:600;
   padding:8px 16px; border-radius:999px; box-shadow:var(--sh-sm);
-  transition:transform .15s;
+  transition:transform .15s; display:inline-flex; align-items:center; gap:6px;
 }
+.acts button .ic{width:14px; height:14px; stroke-width:2.2}
 .acts button:hover{transform:translateY(-1px)}
 .b-ok{background:linear-gradient(135deg,#16a34a,#4ade80); color:#fff}
 .b-no{background:var(--bad-bg); color:var(--bad); border:1px solid transparent !important}
@@ -318,7 +339,9 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 .memnote{
   margin-top:8px; padding:8px 11px; border-radius:14px; font-size:12px;
   background:rgba(124,92,255,.12); border:1px solid rgba(124,92,255,.3);
+  display:flex; align-items:flex-start; gap:6px;
 }
+.memnote .ic{width:14px; height:14px; margin-top:2px; color:var(--me1)}
 .mchip{
   display:inline-block; font-size:10.5px; padding:1px 8px; border-radius:9px;
   background:var(--chip); border:1px solid var(--brd-soft);
@@ -327,7 +350,9 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 .mchip.lesson{background:var(--warn-bg)}
 .mchip.promise{background:var(--ok-bg)}
 .mchip.episode{background:rgba(56,189,248,.16)}
-.msrc{font-size:10.5px; color:var(--mut); padding:0 2px 6px}
+.msrc{font-size:10.5px; color:var(--mut); padding:0 2px 6px;
+       display:flex; align-items:center; gap:5px}
+.msrc .ic{width:12px; height:12px}
 
 /* أزرار سريعة + إدخال: شريط عائم زجاجي */
 #chips{display:flex; gap:8px; overflow-x:auto; padding:8px 14px 2px;
@@ -336,8 +361,9 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 #chips button{
   flex:none; border:1px solid var(--brd-soft); background:var(--chip); color:var(--ink);
   font:inherit; font-size:12.5px; padding:6px 14px; border-radius:999px; cursor:pointer;
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px); display:inline-flex; align-items:center; gap:6px;
 }
+#chips button .ic{width:14px; height:14px; color:var(--me1)}
 #composer{
   display:flex; gap:8px; align-items:center; margin:8px 12px calc(10px + env(safe-area-inset-bottom));
   padding:5px 5px 5px 10px; border-radius:999px;
@@ -351,7 +377,8 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
 #inp::placeholder{color:var(--mut)}
 #send{
   width:46px; height:46px; flex:none; border:0; border-radius:50%; cursor:pointer;
-  background:linear-gradient(135deg,var(--me1),var(--me2)); color:#fff; font-size:16px;
+  background:linear-gradient(135deg,var(--me1),var(--me2)); color:#fff;
+  display:grid; place-items:center;
   box-shadow:0 6px 16px rgba(124,92,255,.4); transition:transform .15s;
 }
 #send:hover{transform:scale(1.06)}
@@ -364,6 +391,8 @@ html[data-theme="dark"] .foot-note a{color:#c4b5fd}
   border:1px solid rgba(217,119,6,.4); box-shadow:var(--sh-sm);
 }
 html[data-theme="dark"] .demo-flag{background:rgba(58,36,16,.95); color:#fdba74}
+.demo-flag{display:flex; align-items:center; justify-content:center; gap:6px}
+.demo-flag .ic{width:14px; height:14px}
 html[data-theme="dark"] .bub{
   background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03)),var(--ag-bub);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10), var(--sh-sm);

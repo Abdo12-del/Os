@@ -24,27 +24,27 @@
           </div>
         </div>
         <div class="head-acts">
-          <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع">🌙</button>
-          <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
+          <button id="theme-btn" title="ليلي / نهاري" aria-label="تبديل الوضع"><svg class="ic"><use href="#i-moon"/></svg></button>
+          <a id="to-tables" href="/console" title="عرض الجداول الكاملة"><svg class="ic"><use href="#i-grid"/></svg></a>
         </div>
       </div>
       <div id="agent-row" class="agent-row" aria-label="وكلاؤك"></div>
     </header>
     <div class="sec-head">
-      <b>💬 المحادثات</b>
+      <b><svg class="ic s15"><use href="#i-chat"/></svg> المحادثات</b>
       <button id="pend-pill" class="sec-pill" title="افتح محادثة رئيس العمليات">…</button>
     </div>
     <div id="threads" role="list"></div>
     <footer class="foot-note">
-      🔒 كل رسالة مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول الكاملة</a>
+      <svg class="ic s12"><use href="#i-lock"/></svg> كل رسالة مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول الكاملة</a>
     </footer>
   </aside>
 
   <!-- ══ المحادثة ══ -->
   <main id="pane-chat" class="hidden">
     <header class="chat-head">
-      <button id="back" aria-label="رجوع">›</button>
-      <span class="avatar sm" id="head-av">🧭</span>
+      <button id="back" aria-label="رجوع"><svg class="ic s22"><use href="#i-back"/></svg></button>
+      <span class="avatar sm" id="head-av">…</span>
       <div class="who">
         <b id="head-name">…</b>
         <span id="head-status">…</span>
@@ -57,11 +57,41 @@
     <div id="chips"></div>
     <form id="composer" autocomplete="off">
       <input id="inp" placeholder="اكتب… «موافقة 12» · «رفض 12 السبب: …» · «الملخص» · «ابحث عن …»">
-      <button id="send" type="submit" aria-label="إرسال">➤</button>
+      <button id="send" type="submit" aria-label="إرسال"><svg class="ic s20"><use href="#i-send"/></svg></button>
     </form>
   </main>
 
 </div>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M2 2l11 11"/><path d="M2 2l7 20 4-9 9-4z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 13.5"/></symbol>
+<symbol id="i-checkc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.5 11 15 15.5 9.5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><polyline points="5 13 9 17 19 7"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17.2v.6"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></symbol>
+<symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 9V3M9 6l3-3 3 3"/><path d="M4 18h2M18 18h2M6.3 10.3l1.4 1.4M16.3 11.7l1.4-1.4M3 22h18"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><polyline points="14 2 14 7 19 7"/><path d="M9 13h6M9 17h6"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.3 9a2.8 2.8 0 0 1 5.4 1c0 1.8-2.7 2.2-2.7 3.5M12 17v.5"/></symbol>
+<symbol id="i-cash" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v.5M18 13.5v.5"/></symbol>
+<symbol id="i-mega" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+<symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 3h6l-1 7 3 3H7l3-3z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.8"/><path d="M15.5 14.6a5.5 5.5 0 0 1 6 5.4"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M8 20h8M5 7h14"/><path d="M5 7 2.5 12.5a3 3 0 0 0 5 0z"/><path d="M19 7l-2.5 5.5a3 3 0 0 0 5 0z"/></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><polygon points="15 5 5 12 15 19"/></symbol>
+<symbol id="i-ticks" viewBox="0 0 24 24"><polyline points="2 13 6 17 14 7"/><polyline points="10 13 14 17 22 7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+</svg>
 <script src="/chat.js"></script>
 </body>
 </html>

@@ -15,6 +15,23 @@ const el = (tag, cls, txt) => {
   return n;
 };
 const hhmm = iso => (iso || '').slice(11, 16);
+/* أيقونة متجهية من الطقم — لا إيموجي في الواجهة */
+const ic = n => {
+  const d = document.createElement('span');
+  d.className = 'icw';
+  d.innerHTML = `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+  return d;
+};
+const eli = (tag, cls, icon, txt) => {
+  const n = el(tag, cls);
+  n.append(ic(icon), document.createTextNode(txt));
+  return n;
+};
+/* أفاتار حرفي (Monogram) كسلاك وجوجل: حروف الاسم لا رسم إيموجي */
+const mono = n => {
+  const w = (n || '').trim().split(/\s+/).map(x => x.replace(/^ال/, '') || x);
+  return w.length > 1 ? w[0][0] + w[1][0] : (w[0] || '؟').slice(0, 2);
+};
 const dzd = n => (n == null ? '—' : Number(n).toLocaleString('ar-DZ')) + ' دج';
 
 class NoServer extends Error {}
@@ -43,8 +60,9 @@ async function api(path, opts) {
 function demoBanner() {
   if (document.querySelector('.demo-flag')) return;
   document.body.classList.add('demo');
-  const d = el('div', 'demo-flag',
-    '👁 معاينة بعينة بيانات — لا خادم حي هنا. الحيّ على جهازك: python3 ops/server.py');
+  const d = el('div', 'demo-flag');
+  d.append(ic('eye'), document.createTextNode(
+    ' معاينة بعينة بيانات — لا خادم حي هنا. الحيّ على جهازك: python3 ops/server.py'));
   document.body.prepend(d);
 }
 const _now = () => new Date().toISOString();
@@ -162,14 +180,16 @@ async function loadThreads() {
   const pend = THREADS.reduce((s, t) => s + t.pending_count, 0);
   $('#sub').textContent = `${THREADS.length} وكلاء يعملون عندك · ${pend} بانتظار قرارك`;
   const pill = $('#pend-pill');
-  pill.textContent = pend > 0 ? `⏳ ${pend} بانتظار قرارك` : '✅ لا معلّق اليوم';
+  pill.textContent = '';
+  pill.append(ic(pend > 0 ? 'clock' : 'checkc'),
+    document.createTextNode(pend > 0 ? ` ${pend} بانتظار قرارك` : ' لا معلّق اليوم'));
   pill.onclick = () => openThread('head_of_ops');
   const row = $('#agent-row');
   row.textContent = '';
   for (const t of THREADS) {
     const cell = el('button', 'agent-cell');
     cell.title = t.name;
-    const orb = el('span', 'agent-orb ' + t.grad, t.emoji);
+    const orb = el('span', 'agent-orb ' + t.grad, mono(t.name));
     const unread = t.last_id - (READ[t.id] || 0);
     if (unread > 0 && t.id !== CUR) orb.append(el('span', 'badge', String(unread)));
     if (t.revoked_at) orb.classList.add('off');
@@ -183,7 +203,7 @@ async function loadThreads() {
       + (unread0 > 0 ? ' unred' : ''));
     row.setAttribute('role', 'listitem');
     row.dataset.id = t.id;
-    const av = el('span', 'avatar ' + t.grad, t.emoji);
+    const av = el('span', 'avatar ' + t.grad, mono(t.name));
     const tx = el('div', 'tx');
     const nm = el('div', 'nm');
     nm.append(el('b', null, t.name), el('time', null, hhmm(t.last_at)));
@@ -202,13 +222,14 @@ async function openThread(id) {
   const t = THREADS.find(x => x.id === id) || {};
   app.classList.add('show-chat');
   $('#pane-chat').classList.remove('hidden');
-  $('#head-av').textContent = t.emoji || '🧭';
+  $('#head-av').textContent = mono(t.name || '؟');
   $('#head-av').className = 'avatar sm ' + (t.grad || 'g1');
   $('#head-name').textContent = t.name || id;
   $('#head-status').textContent = t.revoked_at
-    ? '⛔ موقوف منذ ' + t.revoked_at.slice(0, 16).replace('T', ' ')
+    ? 'موقوف منذ ' + t.revoked_at.slice(0, 16).replace('T', ' ')
     : (t.role || '');
-  $('#revoke-btn').textContent = t.revoked_at ? '▶️' : '⛔';
+  $('#revoke-btn').textContent = '';
+    $('#revoke-btn').append(ic(t.revoked_at ? 'play' : 'ban'));
   $('#msgs').textContent = '';
   LAST[id] = 0;
   const d = await api('/api/messages?thread=' + id);
@@ -248,8 +269,9 @@ function render(m) {
   const b = el('div', 'bub');
   KIND[m.kind] ? KIND[m.kind](b, m.payload, m) : (b.textContent = m.payload.text || m.kind);
   /* الوقت — والصحّان لحظيًا — داخل الفقاعة كما في التطبيقات الحقيقية */
-  b.append(el('span', 'time', m.sender === 'user'
-    ? hhmm(m.created_at) + '\u00A0\u2713\u2713' : hhmm(m.created_at)));
+  const tm = el('span', 'time', hhmm(m.created_at) + (m.sender === 'user' ? ' ' : ''));
+  if (m.sender === 'user') tm.append(ic('ticks'));
+  b.append(tm);
   wrap.append(b);
   return wrap;
 }
@@ -259,28 +281,32 @@ const kv = (b, k, v) => {
   r.append(el('span', null, k), el('b', null, v));
   b.append(r);
 };
-const riskChip = r => el('span', 'risk ' + (r || 'green'),
-  r === 'red' ? '🔴 حرج' : r === 'yellow' ? '🟡 انتبه' : '🟢 سليم');
+const riskChip = r => {
+  const s2 = el('span', 'risk ' + (r || 'green'));
+  s2.append(el('span', 'dot ' + (r || 'green')),
+    document.createTextNode(r === 'red' ? ' حرج' : r === 'yellow' ? ' انتبه' : ' سليم'));
+  return s2;
+};
 
 const KIND = {
   text(b, p) {
     b.append(el('div', null, p.text || ''));
     if (p.manual) {
-      b.append(el('div', 'warnbox', '⚠️ إجراء موجّه لإنسان — لا يوجد له تنفيذ آلي، '
+      b.append(eli('div', 'warnbox', 'alert', ' إجراء موجّه لإنسان — لا يوجد له تنفيذ آلي، '
         + 'ولن يوجد. التنفيذ يدك.'));
     }
     if (p.draft) {
       const d = el('div', 'draft', p.draft);
-      const cp = el('button', 'b-cp', '📋 انسخ النص');
+      const cp = eli('button', 'b-cp', 'copy', ' نسخ النص');
       cp.onclick = () => navigator.clipboard?.writeText(p.draft)
-        .then(() => cp.textContent = '✅ نُسخ');
+        .then(() => { cp.textContent = ''; cp.append(ic('checkc'), document.createTextNode(' نُسخ')); });
       const acts = el('div', 'acts'); acts.append(cp); b.append(d, acts);
     }
   },
   result(b, p) { KIND.text(b, p); },
 
   brief(b, p) {
-    b.append(el('h4', null, `🌅 ملخص ${p.date} — متأخر ${p.overdue_count}`));
+    b.append(eli('h4', null, 'sunrise', ` ملخص ${p.date} — متأخر ${p.overdue_count}`));
     const S = p.sections || {};
     const sec = (title, rows, fmt) => {
       b.append(el('h4', null, title));
@@ -299,21 +325,21 @@ const KIND = {
     const M = p.memory;
     if (M) {
       if (M.open_decisions && M.open_decisions.length) {
-        b.append(el('h4', null,
-          `🧠 على كتفك ${M.open_decisions.length} قرارات مفتوحة`));
+        b.append(eli('h4', null, 'brain',
+          ` على كتفك ${M.open_decisions.length} قرارات مفتوحة`));
         for (const d of M.open_decisions)
           b.append(el('div', 'case', `• ${d.subject} — اكتب «قررت …» لتزيحه`));
       }
       for (const pr of M.promises || [])
-        b.append(el('div', 'case', `🤝 وعد محفوظ: ${pr.text}`));
+        b.append(eli('div', 'case', 'users', ` وعد محفوظ: ${pr.text}`));
       for (const l of M.recent_lessons || [])
-        b.append(el('div', 'case', `📌 درس: ${l.subject}`));
+        b.append(eli('div', 'case', 'pin', ` درس: ${l.subject}`));
     }
   },
 
   cases(b, p) {
-    b.append(el('h4', null,
-      `💰 المطابقة — فرق صافي ${dzd(p.net_difference)} تحت ${p.case_count} حالات`));
+    b.append(eli('h4', null, 'cash',
+      ` المطابقة — فرق صافي ${dzd(p.net_difference)} تحت ${p.case_count} حالات`));
     kv(b, 'نظام المحاسبة', `${p.totals.accounting.count} دفعة · ${dzd(p.totals.accounting.sum)}`);
     kv(b, 'نظام الأولياء', `${p.totals.parents.count} دفعة · ${dzd(p.totals.parents.sum)}`);
     kv(b, 'متأخرات', p.arrears && p.arrears.length
@@ -327,15 +353,15 @@ const KIND = {
   },
 
   teacher(b, p) {
-    b.append(el('h4', null, `🧑‍🏫 مستند ${p.alias || p.teacher_id} — ${p.group || ''}`));
+    b.append(eli('h4', null, 'users', ` مستند ${p.alias || p.teacher_id} — ${p.group || ''}`));
     kv(b, 'حصص مُقدَّمة', String(p.sessions_delivered ?? '—'));
     kv(b, 'تجارب مجانية', String(p.free_trials ?? '—'));
     kv(b, 'نسبة الأستاذ', p.share_pct == null ? '—' : p.share_pct + '%');
-    kv(b, 'الأساس', p.basis || '⚠️ غير محسوم');
+    kv(b, 'الأساس', p.basis || 'غير محسوم');
     kv(b, 'المستحق', p.amount_due == null ? 'لا أحسبه بلا أساس' : dzd(p.amount_due));
     if (p.basis_memory) {
-      b.append(el('div', 'memnote',
-        `🧠 الأساس من قرارك المحفوظ (#${p.basis_memory.id}): ${p.basis_memory.text}`));
+      b.append(eli('div', 'memnote', 'brain',
+        ` الأساس من قرارك المحفوظ (#${p.basis_memory.id}): ${p.basis_memory.text}`));
     }
     if (p.candidates && p.candidates.length) {
       b.append(el('h4', null, `الأسس الثلاثة — الفارق ${dzd(p.spread_dzd)}`));
@@ -347,7 +373,7 @@ const KIND = {
   },
 
   funnel(b, p) {
-    b.append(el('h4', null, '📣 قمع التسويق'));
+    b.append(eli('h4', null, 'mega', ' قمع التسويق'));
     const top = (p.stages[0] || {}).count || 1;
     for (const s of p.stages || []) {
       const row = el('div', 'stage');
@@ -365,8 +391,8 @@ const KIND = {
   },
 
   leads(b, p) {
-    b.append(el('h4', null,
-      `💬 ${p.never_replied} من ${p.total_leads} (${p.rate_pct}%) لم يُردَّ عليهم`));
+    b.append(eli('h4', null, 'chat',
+      ` ${p.never_replied} من ${p.total_leads} (${p.rate_pct}%) لم يُردَّ عليهم`));
     for (const q of (p.queue || []).slice(0, 5)) {
       const d = el('div', 'case');
       d.append(el('span', 'dot ' + (q.overdue ? 'red' : 'yellow')),
@@ -388,10 +414,10 @@ const KIND = {
     b.append(el('div', 'case', `مفتوح منذ ${p.days_open} يومًا`
       + (p.overdue ? ' — متأخر عن إيقاعك (3 أيام)' : '')));
     if (p.manual_only) {
-      b.append(el('div', 'warnbox', '⚠️ موافقتك تُسجَّل ولا تُنفَّذ: لا يوجد كود ينشر '
+      b.append(eli('div', 'warnbox', 'alert', ' موافقتك تُسجَّل ولا تُنفَّذ: لا يوجد كود ينشر '
         + 'أو يراسل أولياء الأمور. التنفيذ من حسابك.'));
     }
-    if (p.memory_note) b.append(el('div', 'memnote', '🧠 ' + p.memory_note));
+    if (p.memory_note) b.append(eli('div', 'memnote', 'brain', ' ' + p.memory_note));
     if (p.payload && p.payload.text) b.append(el('div', 'draft', p.payload.text));
     if (p.executed || p.status !== 'pending') {
       b.append(el('div', 'done-tag', 'حُسم: ' + p.status
@@ -399,8 +425,8 @@ const KIND = {
       return;
     }
     const acts = el('div', 'acts');
-    const ok = el('button', 'b-ok', '✓ موافقة');
-    const no = el('button', 'b-no', '✗ رفض');
+    const ok = eli('button', 'b-ok', 'check', ' موافقة');
+    const no = eli('button', 'b-no', 'x', ' رفض');
     ok.onclick = () => act(m.thread, {op: 'approve', id: p.id}, acts);
     no.onclick = () => askReason(m.thread, p.id, acts);
     acts.append(ok, no);
@@ -408,7 +434,7 @@ const KIND = {
   },
 
   memory(b, p) {
-    b.append(el('h4', null, '🧠 ' + (p.title || 'الذاكرة')));
+    b.append(eli('h4', null, 'brain', ' ' + (p.title || 'الذاكرة')));
     for (const it of p.items || []) {
       const d = el('div', 'case');
       d.append(el('span', 'mchip ' + it.kind, it.kind_ar || it.kind));
@@ -417,12 +443,12 @@ const KIND = {
       b.append(d);
       b.append(el('div', 'msrc',
         `${it.source || ''} · ${hhmm(it.created_at)} · صلة ${it.score ?? ''}`
-        + (it.superseded_by ? ' · ⤴ مُبطَلة' : '')));
+        + (it.superseded_by ? ' · مُبطَلة' : '')));
     }
   },
 
   websearch(b, p) {
-    b.append(el('h4', null, '🌐 ' + (p.title || 'بحث في الإنترنت')));
+    b.append(eli('h4', null, 'globe', ' ' + (p.title || 'بحث في الإنترنت')));
     for (const it of p.items || []) {
       const d = el('div', 'case');
       const a = document.createElement('a');
@@ -432,11 +458,11 @@ const KIND = {
       if (it.snippet) d.append(el('div', 'msrc', it.snippet));
       b.append(d);
     }
-    if (p.note) b.append(el('div', 'msrc', '⚖️ ' + p.note));
+    if (p.note) b.append(eli('div', 'msrc', 'scale', ' ' + p.note));
   },
 
   audit(b, p) {
-    b.append(el('h4', null, '📜 آخر السجل — لا يُمحى ولا يُعدَّل'));
+    b.append(eli('h4', null, 'file', ' آخر السجل — لا يُمحى ولا يُعدَّل'));
     for (const r of p.rows || [])
       b.append(el('div', 'case',
         `${hhmm(r.ts)} · ${r.agent} · ${r.action} · ${r.outcome}`
@@ -473,15 +499,15 @@ const CHIPS = {
   lead_nurturer: ['الردود', 'ما المعلّق؟'],
 };
 const CHIP_ICON = {
-  'شغّل الوكلاء': '🚀', 'الملخص': '🌅', 'ما المعلّق؟': '⏳', 'السجل': '📜',
-  'مساعدة': '❔', 'المطابقة': '💰', 'مستند T-1': '🧾', 'مستند T-2': '🧾',
-  'القمع': '📣', 'الردود': '💬',
+  'شغّل الوكلاء': 'zap', 'الملخص': 'sunrise', 'ما المعلّق؟': 'clock', 'السجل': 'file',
+  'مساعدة': 'help', 'المطابقة': 'cash', 'مستند T-1': 'file', 'مستند T-2': 'file',
+  'القمع': 'mega', 'الردود': 'chat',
 };
 function chips() {
   const box = $('#chips');
   box.textContent = '';
   for (const c of (CHIPS[CUR] || [])) {
-    const b = el('button', null, (CHIP_ICON[c] || '•') + ' ' + c);
+    const b = eli('button', null, CHIP_ICON[c] || 'chat', ' ' + c);
     b.onclick = () => send(c);
     box.append(b);
   }
@@ -535,7 +561,8 @@ const _themeBtn = $('#theme-btn');
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem('ops-theme-v2', t); } catch (e) { /* خاص */ }
-  _themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  _themeBtn.textContent = '';
+  _themeBtn.append(ic(t === 'dark' ? 'sun' : 'moon'));
   const mt = document.querySelector('meta[name="theme-color"]');
   if (mt) mt.content = t === 'dark' ? '#12142b' : '#eef0fb';
 }
