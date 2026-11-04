@@ -17,6 +17,7 @@
   --sh-sm:0 1px 3px rgba(40,35,90,.08),0 6px 16px rgba(40,35,90,.08);
   --blur:blur(18px) saturate(1.3);
 }
+html[data-theme="dark"] #orbs i{opacity:.45}
 html[data-theme="dark"]{
   --bg1:#12142b; --bg2:#1a1030; --bg3:#0e1c33;
   --orb1:#4636a8; --orb2:#7a2a5e; --orb3:#144a72;
@@ -32,6 +33,13 @@ html[data-theme="dark"]{
 
 *{box-sizing:border-box}
 html,body{height:100%}
+@supports not ((backdrop-filter:blur(4px)) or (-webkit-backdrop-filter:blur(4px))){
+  :root{--glass:rgba(255,255,255,.94); --glass-2:rgba(255,255,255,.88);
+        --ag-bub:rgba(255,255,255,.96); --chip:rgba(244,244,252,.9)}
+  html[data-theme="dark"]{--glass:rgba(26,28,54,.96); --glass-2:rgba(26,28,54,.92);
+        --ag-bub:rgba(36,38,70,.96); --chip:rgba(255,255,255,.12)}
+  #orbs i{filter:blur(46px)}
+}
 body{
   margin:0; color:var(--ink);
   font:15px/1.65 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
@@ -42,7 +50,7 @@ body{
 
 /* ── الكرات اللونية خلف الزجاج ── */
 #orbs{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
-#orbs i{position:absolute; border-radius:50%; filter:blur(70px); opacity:.55;
+#orbs i{position:absolute; border-radius:50%; filter:blur(70px); opacity:.7;
         animation:float 14s ease-in-out infinite alternate}
 #orbs i:nth-child(1){width:46vmin; height:46vmin; background:var(--orb1);
                      top:-12vmin; inset-inline-start:-10vmin}
@@ -65,9 +73,13 @@ body{
 .grad{
   padding:20px 18px 18px; display:flex; align-items:center;
   justify-content:space-between; gap:10px;
-  background:linear-gradient(135deg,rgba(124,92,255,.16),rgba(255,143,196,.14) 60%,rgba(94,210,255,.14));
+  background:
+    radial-gradient(220px 120px at 85% -20%, rgba(255,143,196,.35), transparent),
+    radial-gradient(200px 120px at 10% 110%, rgba(94,210,255,.30), transparent),
+    linear-gradient(135deg,rgba(124,92,255,.18),rgba(255,143,196,.14) 60%,rgba(94,210,255,.14));
   border-bottom:1px solid var(--brd-soft);
 }
+.me h1{font-size:20px; font-weight:800; letter-spacing:.2px}
 html[data-theme="dark"] .grad{
   background:linear-gradient(135deg,rgba(124,92,255,.28),rgba(255,143,196,.14) 60%,rgba(94,210,255,.10));
 }
@@ -86,7 +98,10 @@ html[data-theme="dark"] .grad{
 .avatar{
   width:52px; height:52px; border-radius:50%; flex:none; position:relative;
   display:grid; place-items:center; font-size:24px; color:#fff;
-  box-shadow:0 0 0 2.5px var(--brd), var(--sh-sm);
+  box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 6px 16px rgba(40,35,90,.22);
+}
+html[data-theme="dark"] .avatar{
+  box-shadow:0 0 0 3px rgba(255,255,255,.28), 0 6px 16px rgba(0,0,0,.4);
 }
 .avatar::after{ /* نقطة الاتصال */
   content:""; position:absolute; bottom:1px; inset-inline-end:1px;
@@ -106,8 +121,14 @@ html[data-theme="dark"] .grad{
 .t-row{
   display:flex; gap:12px; align-items:center; padding:11px 12px; cursor:pointer;
   position:relative; border:1px solid var(--brd-soft); border-radius:20px;
-  background:var(--glass-2); backdrop-filter:blur(10px);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65), var(--sh-sm);
   transition:transform .15s, box-shadow .15s;
+}
+html[data-theme="dark"] .t-row{
+  background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), var(--sh-sm);
 }
 .t-row:hover{transform:translateY(-1px); box-shadow:var(--sh-sm)}
 .t-row .avatar{width:46px; height:46px; font-size:21px}
@@ -158,8 +179,10 @@ html[data-theme="dark"] .grad{
 .msg .avatar::after{display:none}
 .bub{
   max-width:min(78%, 560px); padding:11px 15px; border-radius:22px;
-  background:var(--ag-bub); backdrop-filter:blur(10px);
-  border:1px solid var(--brd); box-shadow:var(--sh-sm); font-size:14.5px;
+  background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.78)),var(--ag-bub);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--brd);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), var(--sh-sm); font-size:14.5px;
   white-space:pre-wrap; word-break:break-word;
 }
 .msg.me{flex-direction:row-reverse}
@@ -266,13 +289,18 @@ html[data-theme="dark"] .grad{
 
 /* راية وضع المعاينة (استضافة ثابتة بلا خادم) */
 .demo-flag{
-  position:fixed; top:10px; inset-inline:12px; z-index:50; margin:0 auto;
-  max-width:560px; padding:9px 16px; border-radius:999px; text-align:center;
-  font-size:12px; color:#7c2d12; background:rgba(255,244,222,.9);
-  border:1px solid rgba(217,119,6,.4); backdrop-filter:blur(10px);
-  box-shadow:var(--sh-sm);
+  position:fixed; top:6px; inset-inline:10px; z-index:50; margin:0 auto;
+  max-width:520px; padding:5px 14px; border-radius:999px; text-align:center;
+  font-size:10.5px; line-height:1.5; color:#7c2d12; background:rgba(255,244,222,.95);
+  border:1px solid rgba(217,119,6,.4); box-shadow:var(--sh-sm);
 }
-html[data-theme="dark"] .demo-flag{background:rgba(58,36,16,.9); color:#fdba74}
+html[data-theme="dark"] .demo-flag{background:rgba(58,36,16,.95); color:#fdba74}
+html[data-theme="dark"] .bub{
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03)),var(--ag-bub);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), var(--sh-sm);
+}
+body.demo #app{padding-top:40px}
+@media (max-width:760px){ body.demo #app{padding-top:38px} }
 
 /* أشرطة تمرير رفيعة */
 #msgs::-webkit-scrollbar,#threads::-webkit-scrollbar{width:6px}

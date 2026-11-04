@@ -42,9 +42,9 @@ async function api(path, opts) {
 /* ── وضع المعاينة: عينة من بيانات المستودع حين لا يوجد خادم حي ── */
 function demoBanner() {
   if (document.querySelector('.demo-flag')) return;
+  document.body.classList.add('demo');
   const d = el('div', 'demo-flag',
-    '👁 وضع معاينة — بيانات عينة من المستودع، لا خادم حي هنا. '
-    + 'على جهازك: python3 ops/server.py ثم افتح نفس الشاشة.');
+    '👁 معاينة بعينة بيانات — لا خادم حي هنا. الحيّ على جهازك: python3 ops/server.py');
   document.body.prepend(d);
 }
 const _now = () => new Date().toISOString();
@@ -506,8 +506,7 @@ function setTheme(t) {
 }
 let _savedTheme = null;
 try { _savedTheme = localStorage.getItem('ops-theme'); } catch (e) { /* خاص */ }
-setTheme(_savedTheme
-  || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+setTheme(_savedTheme || 'light');   // الـ pastel هو وجه النظام؛ الليلي بزرّه
 _themeBtn.onclick = () =>
   setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 
