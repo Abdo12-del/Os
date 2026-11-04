@@ -520,13 +520,13 @@ setInterval(async () => {
 const _themeBtn = $('#theme-btn');
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
-  try { localStorage.setItem('ops-theme', t); } catch (e) { /* خاص */ }
+  try { localStorage.setItem('ops-theme-v2', t); } catch (e) { /* خاص */ }
   _themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
   const mt = document.querySelector('meta[name="theme-color"]');
   if (mt) mt.content = t === 'dark' ? '#12142b' : '#eef0fb';
 }
 let _savedTheme = null;
-try { _savedTheme = localStorage.getItem('ops-theme'); } catch (e) { /* خاص */ }
+try { _savedTheme = localStorage.getItem('ops-theme-v2'); } catch (e) { /* خاص */ }
 setTheme(_savedTheme || 'light');   // الـ pastel هو وجه النظام؛ الليلي بزرّه
 _themeBtn.onclick = () =>
   setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
