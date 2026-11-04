@@ -4,7 +4,7 @@
 
 :root{
   --sky:#38B6FF; --sky-deep:#0E7EC7;
-  --bg1:#eaf4ff; --bg2:#f6fbff; --bg3:#f1ecff;
+  --bg1:#eaf4ff; --bg2:#f6fbff; --bg3:#eef5ff;
   --orb1:#bfe3ff; --orb2:#d9c9ff; --orb3:#cdefff;
   --glass:rgba(255,255,255,.66); --glass-2:rgba(255,255,255,.5);
   --card:#ffffff; --panel:rgba(255,255,255,.88);
@@ -480,6 +480,7 @@ html[data-theme="dark"] #tabbar button.on{color:#7cc7ff}
 /* ── الدرج (الإشعارات / الإعدادات) ── */
 #sheet-back{position:fixed; inset:0; z-index:44; background:rgba(8,20,34,.35);
   backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px)}
+#sheet[hidden],#sheet-back[hidden]{display:none}
 #sheet{
   position:fixed; z-index:45; inset-inline:10px;
   bottom:calc(86px + env(safe-area-inset-bottom));
@@ -506,3 +507,7 @@ html[data-theme="dark"] .sh-row .ic{color:#7cc7ff}
 .avatar.sm .ic{width:20px; height:20px}
 .sh-row:disabled{opacity:.65; cursor:default}
 .sh-row:disabled:hover{background:none}
+
+/* لوحة المحادثة: ورق سماوي فاتح كهوية المرجع */
+#pane-chat{background:linear-gradient(180deg,#f5fbff 0%,#e9f3ff 100%)}
+html[data-theme="dark"] #pane-chat{background:linear-gradient(180deg,#0c1723,#0e1b2a)}
