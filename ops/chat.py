@@ -18,11 +18,13 @@
 وما لا يفهمه يقول: «لا أفهم» ويعدّد ما يفهمه — القاعدة الرابعة.
 """
 import json
+import os
 import re
 import unicodedata
 
 import agents
 import engine
+import memory
 
 # ── جهات الاتصال ─────────────────────────────────────────────
 THREADS = [
@@ -186,6 +188,10 @@ def _post_pending(con, thread, row):
         else row['payload']
     d['manual_only'] = row['action_type'] in engine.MANUAL_ONLY
     d['executed'] = bool(row['executed_at'])
+    les = memory.recall(con, f"{row['action_type']} {row.get('reason') or ''}",
+                        owner=row['agent'], kinds=('lesson',), k=1)
+    if les:
+        d['memory_note'] = f"{les[0]['subject']} — {les[0]['text']}"
     return post(con, thread, 'agent', 'proposal', d)
 
 
@@ -220,6 +226,7 @@ def _do_run(con, thread):
 
 def _do_brief(con, thread):
     b = agents.daily_brief(con)
+    b['memory'] = memory.brief_memory(con)
     post(con, thread, 'agent', 'brief', b)
 
 
@@ -239,7 +246,7 @@ def _do_teacher(con, thread, tid=None):
              '، '.join(f"{r['teacher_id']} ({r['alias_name']})" for r in rows) +
              '.\nاكتب «مستند T-1» أو «مستند T-2».')
         return
-    st = agents.teacher_statement(con, tid)
+    st = memory.apply_decision_to_statement(con, agents.teacher_statement(con, tid))
     post(con, thread, 'agent', 'teacher', st)
     if st.get('basis') is None:
         _say(con, thread,
@@ -292,7 +299,95 @@ def _do_restore(con, thread, agent):
           'ok': True, 'detail': r})
 
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASIS_LABEL = {
+    'collected_net': 'المحصَّل المسجَّل في مرجع المال',
+    'collected_actual': 'المحصَّل فعلًا (المسجَّل + ما وصل ولم يُسجَّل)',
+    'collected_gross': 'إجمالي مرجع المال (بما فيه المشتبه بتكراره)',
+    'due': 'المستحق (سواء دُفع أم لا)',
+}
+
+
+def _raw_after(text, needle):
+    i = norm(text).find(norm(needle))
+    return text[i + len(needle):].strip() if i >= 0 else ''
+
+
+def _do_recall(con, thread, q, kinds=None, title=None):
+    if q:
+        items = memory.recall(con, q, kinds=kinds, k=5)
+    else:
+        act = [m for m in memory.all_memories(con, include_invalid=False)
+               if not kinds or m['kind'] in kinds]
+        items = act[-5:][::-1]
+    if not items:
+        _say(con, thread, 'لا تذكر ذاكرتي شيئًا عن هذا — ولا أخترع ذكرى.')
+        return
+    post(con, thread, 'agent', 'memory',
+         {'title': title or f'عن «{q}»', 'items': items})
+
+
+def _do_remember(con, thread, raw):
+    raw = raw.strip()
+    if not raw:
+        _say(con, thread, 'أتذكر ماذا؟ اكتب الجملة كاملة.')
+        return
+    kind = 'promise' if re.search(r'(وعد|ساتصل|سارسل|سعيد|سادفع|ساحضر)',
+                                  norm(raw)) else 'fact'
+    mid = memory.remember(con, kind, 'founder', raw[:48], raw,
+                          tags='#ذاكرة', source='chat')
+    _say(con, thread, f'حفظتُها في العقل الثاني (#{mid}) كـ'
+         f'{"وعد" if kind == "promise" else "حقيقة"}.\n'
+         'ستظهر في الملخص الصباحي حتى تُنفَّذ، ولن تُمحى — إن تغيّرت فسأبطلها '
+         'وأكتب الجديدة جنبها.')
+
+
+def _do_decide(con, thread, raw):
+    tt = norm(raw)
+    if ('اساس' in tt and ('استاذ' in tt or 'حصه' in tt or 'نسبه' in tt)) \
+            or 'share_basis' in tt:
+        key = None
+        if 'مستحق' in tt:
+            key = 'due'
+        elif 'فعلي' in tt or 'واصل' in tt or 'وصل' in tt:
+            key = 'collected_actual'
+        elif 'اجمالي' in tt or 'كلي' in tt:
+            key = 'collected_gross'
+        elif 'صافي' in tt or 'مسجل' in tt:
+            key = 'collected_net'
+        if key:
+            old, new = memory.decide(con, '#share_basis', 'أساس حصة الأستاذ',
+                                     raw.strip(), source='chat',
+                                     extra_tags=f'#basis:{key}')
+            msg = (f'قرار محفوظ (#{new}): أساس حصة الأستاذ = {BASIS_LABEL[key]}.\n'
+                   'من الآن يخرج مستند الأستاذ بمبلغ محسوب، ومصدره هذه الذكرى.')
+            if old:
+                msg += (f'\nالقرار السابق (#{old["id"]}) أُبطل وبقي في التاريخ — '
+                        'لا شيء يُمحى.')
+            _say(con, thread, msg)
+            return
+        _say(con, thread, 'أي أساس؟ اكتب واحدة: صافي المسجَّل / الفعلي الواصل / '
+                          'الإجمالي / المستحق.')
+        return
+    mid = memory.remember(con, 'decision', 'founder', raw.strip()[:48],
+                          raw.strip(), tags='#قرار', source='chat')
+    _say(con, thread, f'سجّلتُ قرارك (#{mid}) في العقل الثاني. سأبني عليه '
+                      'ولا أنساه.')
+
+
+def _do_export(con, thread):
+    path = os.path.join(REPO_ROOT, 'memory', 'exports',
+                        f'export-{engine.NOW.date().isoformat()}.md')
+    n = memory.export_md(con, path)
+    _say(con, thread, f'صدّرتُ {n} ذكرى إلى {os.path.relpath(path, REPO_ROOT)}.\n'
+         'اعمل لها commit فيصير درسُ اليوم تدريبًا دائمًا للوكلاء.')
+
+
 HELP = ('أفهم هذه — ولا أدّعي غيرها:\n'
+        '• تذكّر أن … — احفظها في العقل الثاني\n'
+        '• قررت … — قرار يُبطِل ما قبله ويبقيه في التاريخ\n'
+        '• ماذا تذكر عن …؟ / ماذا قررت؟ / لماذا رفضت؟\n'
+        '• صدّر الذاكرة — اكتبها ملفًّا لتcommitها\n'
         '• شغّل الوكلاء — يعمل الأربعة\n'
         '• الملخص — ملخص الصباح بأقسامه الثلاثة\n'
         '• المطابقة — حالات المال الست\n'
@@ -388,6 +483,34 @@ def handle(con, thread, text):
             _do_restore(con, thread, a)
         else:
             _say(con, thread, 'أعيد من؟ سمِّ الوكيل.')
+        return _since(con, before)
+
+    # ٣.٥) الذاكرة — العقل الثاني
+    if re.search(r'(صدر الذاكره|تصدير الذاكره)', t):
+        _do_export(con, thread)
+        return _since(con, before)
+    m = re.search(r'(ماذا تذكر|ما الذي تذكره|ذاكرتك عن|ابحث في الذاكره|تذكر ماذا)'
+                  r'\s*(.*)$', t)
+    if m:
+        _do_recall(con, thread, _raw_after(text, m.group(1)))
+        return _since(con, before)
+    m = re.search(r'(ماذا قررت|ما قرارك عن|قراراتي)\s*(.*)$', t)
+    if m:
+        _do_recall(con, thread, _raw_after(text, m.group(1)),
+                   kinds=('decision',), title='قراراتك المحفوظة')
+        return _since(con, before)
+    if re.search(r'(لماذا رفضت|دروس الرفض|اسباب الرفض)', t):
+        # الدروس تُستعرض الأحدث أولًا — سؤالها لا يحمل رموز بحث
+        _do_recall(con, thread, '', kinds=('lesson',),
+                   title='دروس محفوظة من رفضك')
+        return _since(con, before)
+    m = re.search(r'^(?:تذكر|اذكر)\s*(?:ان|:)?\s*(.+)$', t)
+    if m:
+        _do_remember(con, thread, text[m.end(0) - len(m.group(1)):])
+        return _since(con, before)
+    m = re.search(r'^(?:قررت|قراري)\s*:?\s*(.+)$', t)
+    if m:
+        _do_decide(con, thread, m.group(1))
         return _since(con, before)
 
     # ٤) تشغيل

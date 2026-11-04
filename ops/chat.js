@@ -141,6 +141,19 @@ const KIND = {
       for (const x of p.missing)
         b.append(el('div', 'case', `• ${x.field}: ${x.question}`));
     }
+    const M = p.memory;
+    if (M) {
+      if (M.open_decisions && M.open_decisions.length) {
+        b.append(el('h4', null,
+          `🧠 على كتفك ${M.open_decisions.length} قرارات مفتوحة`));
+        for (const d of M.open_decisions)
+          b.append(el('div', 'case', `• ${d.subject} — اكتب «قررت …» لتزيحه`));
+      }
+      for (const pr of M.promises || [])
+        b.append(el('div', 'case', `🤝 وعد محفوظ: ${pr.text}`));
+      for (const l of M.recent_lessons || [])
+        b.append(el('div', 'case', `📌 درس: ${l.subject}`));
+    }
   },
 
   cases(b, p) {
@@ -165,6 +178,10 @@ const KIND = {
     kv(b, 'نسبة الأستاذ', p.share_pct == null ? '—' : p.share_pct + '%');
     kv(b, 'الأساس', p.basis || '⚠️ غير محسوم');
     kv(b, 'المستحق', p.amount_due == null ? 'لا أحسبه بلا أساس' : dzd(p.amount_due));
+    if (p.basis_memory) {
+      b.append(el('div', 'memnote',
+        `🧠 الأساس من قرارك المحفوظ (#${p.basis_memory.id}): ${p.basis_memory.text}`));
+    }
     if (p.candidates && p.candidates.length) {
       b.append(el('h4', null, `الأسس الثلاثة — الفارق ${dzd(p.spread_dzd)}`));
       for (const c of p.candidates)
@@ -219,6 +236,7 @@ const KIND = {
       b.append(el('div', 'warnbox', '⚠️ موافقتك تُسجَّل ولا تُنفَّذ: لا يوجد كود ينشر '
         + 'أو يراسل أولياء الأمور. التنفيذ من حسابك.'));
     }
+    if (p.memory_note) b.append(el('div', 'memnote', '🧠 ' + p.memory_note));
     if (p.payload && p.payload.text) b.append(el('div', 'draft', p.payload.text));
     if (p.executed || p.status !== 'pending') {
       b.append(el('div', 'done-tag', 'حُسم: ' + p.status
@@ -232,6 +250,20 @@ const KIND = {
     no.onclick = () => askReason(m.thread, p.id, acts);
     acts.append(ok, no);
     b.append(acts);
+  },
+
+  memory(b, p) {
+    b.append(el('h4', null, '🧠 ' + (p.title || 'الذاكرة')));
+    for (const it of p.items || []) {
+      const d = el('div', 'case');
+      d.append(el('span', 'mchip ' + it.kind, it.kind_ar || it.kind));
+      d.append(el('b', null, ' ' + it.subject + ' '));
+      d.append(el('span', null, '— ' + it.text));
+      b.append(d);
+      b.append(el('div', 'msrc',
+        `${it.source || ''} · ${hhmm(it.created_at)} · صلة ${it.score ?? ''}`
+        + (it.superseded_by ? ' · ⤴ مُبطَلة' : '')));
+    }
   },
 
   audit(b, p) {

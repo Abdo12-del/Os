@@ -68,6 +68,10 @@ GROUPS = [
     ]),
     ('يعمل الآن — مركز العمليات', [
         ('ops/README.md', '★ محرّك يعمل، لا وثيقة'),
+        ('memory/00-architecture.md', '★ العقل الثاني: معمارية الذاكرة'),
+        ('memory/facts-business.md', 'تدريب: حقائق العمل'),
+        ('memory/decisions-open.md', 'تدريب: القرارات المفتوحة'),
+        ('memory/lessons-seed.md', 'تدريب: الدروس الأولى'),
     ]),
     ('البنية التقنية (أنت المبرمج)', [
         ('tech/01-schema.sql', 'مخطط قاعدة البيانات'),
@@ -87,7 +91,8 @@ GROUPS = [
     ]),
 ]
 
-SKIP = {'log.md'}  # سجل داخلي، لا يُنشر على الويب
+SKIP = {'log.md'}
+SKIP_DIR = {'memory/exports'}   # لقطات مولّدة، لا صفحات
 
 
 # ─────────────────────────────────────────────────────────────
@@ -555,6 +560,8 @@ def main():
             if not (fn.endswith('.md') or fn.endswith('.sql')):
                 continue
             rel = os.path.relpath(os.path.join(dirpath, fn), ROOT).replace(os.sep, '/')
+            if rel.split('/')[0:2] and '/'.join(rel.split('/')[:2]) in SKIP_DIR:
+                continue                      # لقطة مولّدة: ليست وثيقة
             if rel not in covered:
                 errors.append(f'غير مغطّى في الموقع: {rel}')
 

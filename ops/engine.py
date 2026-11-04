@@ -23,6 +23,17 @@ import agents
 
 NOW = datetime(2026, 11, 4, 7, 0, 0)   # ساعة ثابتة للتجربة؛ server.py يمرّر الحقيقية
 
+# ── خطافات الأحداث: الذاكرة تلتقط ولا تكسر العمل ──
+ON_EVENT = []
+
+
+def _emit(con, event, data):
+    for fn in ON_EVENT:
+        try:
+            fn(con, event, data)
+        except Exception:                                  # noqa: BLE001
+            pass      # فشل الذاكرة لا يُسقط قرارًا ولا تنفيذًا
+
 
 def _ts(dt=None):
     return (dt or NOW).isoformat(timespec='seconds')
@@ -149,6 +160,8 @@ def approve(con, action_id, founder='founder'):
         audit(con, row['agent'], f'approved_manual:{at}', row['source_ref'],
               outcome='needs_approval',
               note='وافق المؤسس — والتنفيذ يبقى يدويًا من حسابه. لا endpoint.')
+        _emit(con, 'approved_manual', {'id': action_id, 'agent': row['agent'],
+                                       'action_type': at})
         return {'id': action_id, 'status': 'approved', 'executed': False,
                 'executed_at': None,
                 'manual_instruction': MANUAL_INSTRUCTIONS[at],
@@ -167,6 +180,12 @@ def approve(con, action_id, founder='founder'):
     con.commit()
     audit(con, row['agent'], f'executed:{at}', row['source_ref'], 1, 'ok',
           note=f'نفّذه تطبيق المؤسس بعد موافقة {founder}')
+    _res = result or {}
+    _emit(con, 'executed', {'id': action_id, 'agent': row['agent'],
+                            'action_type': at,
+                            'ref': _res.get('inserted') or _res.get('updated')
+                            or _res.get('closed') or _res.get('expense_id')
+                            or _res.get('lead_id')})
     return {'id': action_id, 'status': 'approved', 'executed': True,
             'executed_at': _ts(), 'result': result}
 
@@ -231,6 +250,9 @@ def reject(con, action_id, reason, founder='founder'):
     con.commit()
     audit(con, row['agent'], f'rejected:{row["action_type"]}', row['source_ref'],
           outcome='refused', note=reason.strip())
+    _emit(con, 'reject', {'id': action_id, 'agent': row['agent'],
+                          'action_type': row['action_type'],
+                          'reason': reason.strip()})
     return {'id': action_id, 'status': 'rejected', 'reason': reason.strip()}
 
 

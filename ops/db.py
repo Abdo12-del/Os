@@ -155,6 +155,23 @@ CREATE TABLE IF NOT EXISTS chat_state (
     awaiting_reason_for INTEGER              -- رفض ينتظر سببه من المؤسس
 );
 CREATE INDEX IF NOT EXISTS idx_chat_thread ON chat_messages(thread, id);
+
+-- ── الذاكرة: العقل الثاني. لا تُمحى ذكرى أبدًا — تُستبدل فقط ──
+CREATE TABLE IF NOT EXISTS memories (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind        TEXT NOT NULL,          -- episode|fact|decision|promise|lesson
+    owner       TEXT NOT NULL,          -- وكيل معيّن أو founder
+    subject     TEXT NOT NULL,
+    text        TEXT NOT NULL,
+    tags        TEXT NOT NULL DEFAULT '',
+    source      TEXT NOT NULL,          -- من أين جاءت: ملف تدريب؟ دردشة؟ محرّك؟
+    importance  REAL NOT NULL,
+    created_at  TEXT NOT NULL,
+    valid_to    TEXT,                   -- متى توقفت عن الصدق (null = صادقة الآن)
+    superseded_by INTEGER               -- الذكرى التي حلّت محلها — لا حذف أبدًا
+);
+CREATE INDEX IF NOT EXISTS idx_mem_kind ON memories(kind, superseded_by);
+CREATE INDEX IF NOT EXISTS idx_mem_tags ON memories(tags);
 """
 
 

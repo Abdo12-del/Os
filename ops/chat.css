@@ -169,6 +169,21 @@ body{
                  background:var(--pane); color:var(--ink)}
 .done-tag{font-size:11px; color:var(--mut); margin-top:8px}
 
+/* الذاكرة */
+.memnote{
+  margin-top:8px; padding:7px 10px; border-radius:10px; font-size:12px;
+  background:rgba(99,102,241,.10); border:1px solid rgba(99,102,241,.35);
+  color:inherit;
+}
+.mchip{
+  display:inline-block; font-size:10.5px; padding:1px 7px; border-radius:8px;
+  background:var(--chip); border:1px solid var(--line);
+}
+.mchip.decision{background:rgba(99,102,241,.15)}
+.mchip.lesson{background:rgba(217,119,6,.15)}
+.mchip.promise{background:rgba(22,163,74,.15)}
+.msrc{font-size:10.5px; color:var(--mut); padding:0 0 6px 0}
+
 /* أزرار سريعة + إدخال */
 #chips{display:flex; gap:8px; overflow-x:auto; padding:8px 12px;
        border-top:1px solid var(--line); background:var(--pane)}

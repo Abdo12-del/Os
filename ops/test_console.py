@@ -325,6 +325,86 @@ def main():
     code, res = get('/api/messages?thread=head_of_ops&since=1')
     check('since= يعيد الجديد فقط', all(m['id'] > 1 for m in res['messages']))
 
+    # ── ١٤) الذاكرة: العقل الثاني ──
+    print('\n[١٤] الذاكرة — تتدرّب من GitHub، تتعلّم من رفضك، ولا تنسى')
+    code, res = get('/api/memory?all=1')
+    mem = res.get('memories', [])
+    nrepo = sum(1 for m in mem if m['source'].startswith('repo:memory/'))
+    check('التدريب من memory/*.md أُلتهم عند الإقلاع',
+          code == 200 and nrepo >= 30, f'{nrepo} من {len(mem)} ذكرى')
+    check('المجموعات السابقة التقطت ذاكرة تلقائيًا (رفض/تنفيذ)',
+          any(m['source'].startswith('engine:') for m in mem),
+          str(sum(1 for m in mem if m['source'].startswith('engine:'))))
+    check('الأنواع الأربعة + درس موجودة',
+          {'fact', 'decision', 'lesson'} <= {m['kind'] for m in mem})
+
+    code, res = post('/api/chat', {'thread': 'head_of_ops',
+                                   'text': 'تذكّر أني وعدت وليّ بالاتصال قبل الخميس'})
+    check('«تذكّر أن …» تحفظ وعدًا لا حقيقة',
+          'وعد' in res['messages'][-1]['payload']['text']
+          and any(m['kind'] == 'promise'
+                  for m in get('/api/memory?all=1')[1]['memories']))
+
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن فرط الحركة؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    top = card[0]['payload']['items'][0]['subject'] if card else ''
+    check('الاسترجاع مرجّح: فرط الحركة تجيب درس «لا وعد بعلاج» أو وجعها',
+          bool(card) and top in ('لا وعد بعلاج', 'الوجع الأول', 'الزاوية المعتمدة'),
+          top)
+
+    post('/api/chat', {'thread': 'head_of_ops', 'text': 'شغّل الوكلاء'})
+    live = {x['id'] for x in get('/api/pending')[1]['pending']}   # الحيّ لا لقطة الفقاعة
+    pr, prth = [], None
+    for th in ('accountant', 'marketing', 'lead_nurturer'):
+        _, rr = get('/api/messages?thread=' + th)
+        pr = [m['payload'] for m in rr['messages']
+              if m['kind'] == 'proposal' and m['payload']['id'] in live]
+        if pr:
+            prth = th
+            break
+    if pr:
+        post('/api/chat/action', {'thread': prth, 'op': 'reject',
+                                  'id': pr[0]['id'], 'reason': 'يوحي بعلاج فرط الحركة'})
+        les = [m for m in get('/api/memory?all=1')[1]['memories']
+               if m['kind'] == 'lesson' and m['source'].startswith('engine:reject')]
+        check('كل رفض يلتقط درسًا تلقائيًا بمصدره',
+              bool(les) and 'يوحي بعلاج' in les[-1]['text'],
+              les[-1]['source'] if les else 'لا درس')
+        code, res = post('/api/chat', {'thread': prth,
+                                       'text': 'لماذا رفضت؟'})
+        c2 = [m for m in res['messages'] if m['kind'] == 'memory']
+        check('«لماذا رفضت؟» تسترجع الدروس', bool(c2)
+              and c2[0]['payload']['items'][0]['kind'] == 'lesson')
+    else:
+        check('كل رفض يلتقط درسًا تلقائيًا بمصدره', False, 'لا اقتراح')
+        check('«لماذا رفضت؟» تسترجع الدروس', False, '')
+
+    code, res = post('/api/chat', {'thread': 'accountant',
+                                   'text': 'قررت أساس حصة الأستاذ على المحصل الفعلي الواصل'})
+    _, st = get('/api/teacher/T-2')
+    cand = next((c for c in st['candidates'] if c['basis'] == 'collected_actual'), {})
+    check('القرار المحفوظ يصير رقمًا محسوبًا في المستند',
+          st['basis'] == 'collected_actual' and st['amount_due'] == cand.get('amount')
+          and st.get('basis_memory'), f"basis={st['basis']} due={st['amount_due']}")
+    mem = get('/api/memory?all=1')[1]['memories']
+    dead = [m for m in mem if m['kind'] == 'decision' and m['superseded_by']]
+    act = [m for m in mem if m['kind'] == 'decision'
+           and not m['superseded_by'] and '#share_basis' in m['tags']]
+    check('القرار القديم يُبطل ويبقى في التاريخ — لا حذف',
+          bool(dead) and len(act) == 1,
+          f'مُبطل {len(dead)} / نشط {len(act)}')
+    check('الملخص أزاح القرار عن كتفه: 5 مفتوحة من 6',
+          len(get('/api/brief')[1]['memory']['open_decisions']) == 5)
+
+    code, res = post('/api/memory/export', {})
+    import os as _os
+    check('«صدّر الذاكرة» تكتب لقطة في memory/exports بلا أن تصير تدريبًا',
+          code == 200 and _os.path.exists(res['path'])
+          and not any(m['source'].endswith(_os.path.basename(res['path']))
+                      for m in get('/api/memory?all=1')[1]['memories']),
+          res.get('path', ''))
+
     # ── الحصيلة ──
     ok = sum(1 for _, o, _ in RESULTS if o)
     print('\n' + '=' * 68)

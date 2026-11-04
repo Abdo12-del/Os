@@ -22,8 +22,10 @@ import db          # noqa: E402
 import engine      # noqa: E402
 import agents      # noqa: E402
 import chat        # noqa: E402
+import memory      # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)                 # جذر المستودع — مجلد memory/ فيه
 PORT = int(os.environ.get('PORT', '8080'))
 HOST = os.environ.get('HOST', '0.0.0.0')
 
@@ -31,6 +33,8 @@ db.init()
 _f = db.connect('founder')
 chat.init(_f)
 chat.seed(_f)
+memory.ensure(_f, ROOT)                      # التدريب من ملفات memory/*.md
+engine.ON_EVENT.append(memory.capture)       # كل رفض/تنفيذ يصير ذكرى
 _f.close()
 
 
@@ -79,10 +83,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._file('console.js', 'application/javascript; charset=utf-8')
 
         # التحية الأولى كتابةٌ — فتسبق اتصال القراءة باتصال مؤسس
-        if p in ('/api/threads', '/api/messages'):
-            fc = db.connect('founder')
+        if p in ('/api/threads', '/api/messages', '/api/brief', '/api/memory'):
+            fc = db.connect('founder')       # البذر والتدريب كتابةٌ سابقة للقراءة
             try:
                 chat.seed(fc)
+                memory.ensure(fc, ROOT)
             finally:
                 fc.close()
 
@@ -90,7 +95,9 @@ class Handler(BaseHTTPRequestHandler):
         con = db.connect('agent')
         try:
             if p == '/api/brief':
-                return self._send(200, agents.daily_brief(con))
+                b = agents.daily_brief(con)
+                b['memory'] = memory.brief_memory(con)   # العقل الثاني في الصباح
+                return self._send(200, b)
             if p == '/api/pending':
                 return self._send(200, {
                     'pending': engine.pending(con, 'pending'),
@@ -106,7 +113,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, agents.finance_summary(con))
             if p.startswith('/api/teacher/'):
                 tid = p.rsplit('/', 1)[-1]
-                return self._send(200, agents.teacher_statement(con, tid))
+                return self._send(200, memory.apply_decision_to_statement(
+                    con, agents.teacher_statement(con, tid)))
             if p == '/api/teachers':
                 return self._send(200, {'teachers': [
                     dict(r) for r in con.execute(
@@ -129,6 +137,14 @@ class Handler(BaseHTTPRequestHandler):
                 th = qs.get('thread', ['head_of_ops'])[0]
                 since = int(qs.get('since', ['0'])[0])
                 return self._send(200, {'messages': chat.messages(con, th, since)})
+            if p == '/api/memory':
+                q = qs.get('q', [''])[0]
+                if qs.get('all', ['0'])[0] == '1':
+                    return self._send(200, {'memories': memory.all_memories(con)})
+                kinds = qs.get('kinds', [''])[0].split(',') if qs.get('kinds') else None
+                kinds = [x for x in (kinds or []) if x] or None
+                return self._send(200, {'memories': memory.recall(
+                    con, q, kinds=kinds, k=int(qs.get('k', ['5'])[0]))})
             return self._send(404, {'error': f'لا نقطة بهذا المسار: {p}',
                                     'note': 'لا أخترع مسارًا غير معرَّف'})
         except Exception as e:                                    # noqa: BLE001
@@ -173,6 +189,12 @@ class Handler(BaseHTTPRequestHandler):
                 if not a:
                     return self._send(400, {'error': 'agent مطلوب'})
                 return self._send(200, engine.restore(con, a))
+            if p == '/api/memory/export':
+                path = os.path.join(ROOT, 'memory', 'exports',
+                                     f'export-{engine.NOW.date().isoformat()}.md')
+                n = memory.export_md(con, path)
+                return self._send(200, {'path': os.path.relpath(path, ROOT),
+                                        'count': n})
             if p == '/api/chat':
                 th, text = body.get('thread'), (body.get('text') or '').strip()
                 if th not in chat.BY_ID:
