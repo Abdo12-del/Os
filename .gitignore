@@ -1,0 +1,10 @@
+# بيانات الطلبة والأولياء والدفعات — لا تدخل Git أبدًا
+exports/
+*.csv
+*.xlsx
+*.xls
+!knowledge/**/*.csv
+
+# ملفات محلية
+.DS_Store
+*.tmp
