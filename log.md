@@ -99,3 +99,9 @@
 ❌ 2026-11-09 | الوكيل | أكد استلام دفعة 3000 دج        ← إثبات الدفعة ممنوع
 ❌ 2026-11-09 | الوكيل | تم بنجاح                       ← «تم» لك وحدك
 ```
+2026-11-04 | النشر | Arena Agent | دفع الفرع إلى GitHub: github.com/Abdo12-del/Os/tree/arena/cb54777a-os (19 commits، 47 ملفًا)
+2026-11-04 | النشر | Arena Agent | أدوات/build_site.py — موقع ويب من الوثائق، بلا تبعيات (لا npm/pip/CDN). 46 صفحة.
+2026-11-04 | النشر | Arena Agent | Vercel: مشروع academy-os، البناء python3 tools/build_site.py، الخرج site/dist → READY/production
+2026-11-04 | عطل | Arena Agent | exports/README.md لم يكن متتبَّعًا قط: «exports/» في .gitignore يستثني المجلد فلا يعمل «!exports/README.md». البناء على Vercel أنتج 45 صفحة لا 46. أُصلح إلى «exports/*».
+2026-11-04 | عطل | Arena Agent | cleanUrls كان يجعل كل نقرة قفزة 308 (الروابط تنتهي بـ .html). أُزيل.
+2026-11-04 | تحقّق | Arena Agent | فحص التغطية في build_site.py هو الذي أمسك العطل الأول — أي وثيقة في GROUPS وغير موجودة في الاستنساخ يحذّر منها البناء.
