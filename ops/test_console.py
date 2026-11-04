@@ -236,6 +236,95 @@ def main():
     check('404 مع «لا أخترع مسارًا»', code == 404 and 'لا نقطة' in res.get('error', ''),
           res.get('error', '')[:40])
 
+    # ── ١٣) الدردشة: الواجهة messenger ──
+    print('\n[١٣] الدردشة — وكيل لكل محادثة، والقرار داخل الفقاعة')
+    code, res = get('/api/threads')
+    th = res.get('threads', [])
+    check('أربع جهات اتصال بأسماء الوكلاء', code == 200 and len(th) == 4
+          and {t['id'] for t in th} == {'head_of_ops', 'accountant',
+                                        'marketing', 'lead_nurturer'},
+          ', '.join(t['name'] for t in th))
+    check('كل جهة فيها تحية أولى — لا شاشة بيضاء',
+          all(t['last_preview'] and 'لا رسائل' not in t['last_preview'] for t in th))
+
+    with urllib.request.urlopen(BASE + '/') as r:
+        root = r.read().decode()
+    with urllib.request.urlopen(BASE + '/console') as r:
+        cons = r.read().decode()
+    check('الجذر / هو الدردشة، واللوحات في /console',
+          'pane-threads' in root and 'pane-threads' not in cons)
+
+    code, res = post('/api/chat', {'thread': 'head_of_ops', 'text': 'شغّل الوكلاء'})
+    txt = ' '.join(m['payload'].get('text', '') for m in res.get('messages', []))
+    check('«شغّل الوكلاء» يشغّل ويرسل ملخصًا لرئيس العمليات',
+          code == 200 and 'شغّلتُ الوكلاء' in txt, txt[:50])
+    code, res = get('/api/messages?thread=accountant')
+    nprop = sum(1 for m in res['messages'] if m['kind'] == 'proposal')
+    check('كل اقتراح وصل فقاعة في محادثة وكيله', nprop >= 1, f'{nprop} فقاعة')
+
+    # موافقة من داخل الفقاعة على إجراء له تنفيذ
+    code, res = get('/api/messages?thread=accountant')
+    ex = next((m['payload'] for m in res['messages']
+               if m['kind'] == 'proposal' and m['payload']['status'] == 'pending'
+               and m['payload']['action_type'] in
+               ('classify_expense', 'close_month', 'correct_payment')), None)
+    if ex:
+        code, res = post('/api/chat/action',
+                         {'thread': 'accountant', 'op': 'approve', 'id': ex['id']})
+        last = res['messages'][-1]['payload']['text']
+        check('موافقة داخل الفقاعة تُنفَّذ وتقول المرجع',
+              code == 200 and 'نُفّذ' in last and 'المرجع' in last, last[:55])
+    else:
+        check('موافقة داخل الفقاعة تُنفَّذ وتقول المرجع', False, 'لا اقتراح قابلًا')
+
+    # موافقة على إجراء يدوي: تُسجَّل ولا تُنفَّذ
+    code, res = get('/api/messages?thread=lead_nurturer')
+    man = next((m['payload'] for m in res['messages']
+                if m['kind'] == 'proposal' and m['payload']['status'] == 'pending'
+                and m['payload']['manual_only']), None)
+    if man:
+        code, res = post('/api/chat/action',
+                         {'thread': 'lead_nurturer', 'op': 'approve', 'id': man['id']})
+        last = res['messages'][-1]['payload']
+        check('موافقة على إرسال لولي أمر: تُسجَّل ولا تُنفَّذ + مسوّدة تُنسخ',
+              'لا يوجد تنفيذ آلي' in last['text'] and bool(last.get('draft')),
+              last['text'][:50])
+        code, res2 = post('/api/chat/action',
+                          {'thread': 'lead_nurturer', 'op': 'reject',
+                           'id': man['id'], 'reason': ''})
+        check('زر الرفض بلا سبب يُوقف ويُطلب السبب',
+              'الرفض بلا سبب' in res2['messages'][-1]['payload']['text'])
+        code, res3 = post('/api/chat', {'thread': 'lead_nurturer',
+                                        'text': f'رفض {man["id"]} السبب: تجربة'})
+        t3 = res3['messages'][-1]['payload']['text']
+        check('الرفض بالسبب يُسجَّل نظيفًا بلا نقطتين سابقتين',
+              '«تجربة»' in t3, t3[:55])
+    else:
+        check('موافقة على إرسال لولي أمر: تُسجَّل ولا تُنفَّذ + مسوّدة تُنسخ',
+              False, 'لا اقتراح يدويًا')
+        check('زر الرفض بلا سبب يُوقف ويُطلب السبب', False, '')
+        check('الرفض بالسبب يُسجَّل نظيفًا بلا نقطتين سابقتين', False, '')
+
+    code, res = post('/api/chat', {'thread': 'accountant', 'text': 'المطابقة'})
+    check('«المطابقة» ترسل بطاقة الحالات',
+          any(m['kind'] == 'cases' for m in res['messages']))
+    code, res = post('/api/chat', {'thread': 'accountant', 'text': 'مستند T-1'})
+    tm = [m for m in res['messages'] if m['kind'] == 'teacher']
+    check('«مستند T-1» بلا أساس محسوم: لا أعرف + الفارق',
+          tm and tm[0]['payload']['basis'] is None
+          and 'الفارق' in res['messages'][-1]['payload']['text'])
+    code, res = post('/api/chat', {'thread': 'head_of_ops', 'text': 'اطلب بيتزا'})
+    check('ما لا يفهمه يقول لا أفهم',
+          'لا أفهم' in res['messages'][-1]['payload']['text'])
+    code, res = post('/api/chat', {'thread': 'accountant', 'text': 'أوقف المحاسب'})
+    check('«أوقف المحاسب» من داخل المحادثة',
+          'أوقفتُ' in res['messages'][-1]['payload']['text'])
+    code, res = post('/api/chat', {'thread': 'accountant', 'text': 'أعد المحاسب'})
+    check('«أعد المحاسب» يعيده',
+          'أعدتُ' in res['messages'][-1]['payload']['text'])
+    code, res = get('/api/messages?thread=head_of_ops&since=1')
+    check('since= يعيد الجديد فقط', all(m['id'] > 1 for m in res['messages']))
+
     # ── الحصيلة ──
     ok = sum(1 for _, o, _ in RESULTS if o)
     print('\n' + '=' * 68)

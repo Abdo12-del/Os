@@ -152,8 +152,8 @@ def approve(con, action_id, founder='founder'):
         return {'id': action_id, 'status': 'approved', 'executed': False,
                 'executed_at': None,
                 'manual_instruction': MANUAL_INSTRUCTIONS[at],
-                'warning': ('هذا إجراء面向ลูกค้า — لا يُنفَّذ آليًا حتى بعد الموافقة. '
-                            'نفّذه من حسابك.').replace('面向고객', 'موجّه لولي أمر')}
+                'warning': ('هذا إجراء موجّه لولي أمر — لا يُنفَّذ آليًا حتى بعد '
+                            'الموافقة. نفّذه من حسابك.')}
 
     if at not in EXECUTABLE:
         audit(con, row['agent'], f'approved_unexecutable:{at}', row['source_ref'],

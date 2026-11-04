@@ -21,12 +21,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import db          # noqa: E402
 import engine      # noqa: E402
 import agents      # noqa: E402
+import chat        # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get('PORT', '8080'))
 HOST = os.environ.get('HOST', '0.0.0.0')
 
 db.init()
+_f = db.connect('founder')
+chat.init(_f)
+chat.seed(_f)
+_f.close()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -60,12 +65,26 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         p, qs = u.path, parse_qs(u.query)
 
-        if p in ('/', '/index.html'):
+        if p in ('/', '/index.html', '/chat'):
+            return self._file('chat.html', 'text/html; charset=utf-8')
+        if p == '/chat.css':
+            return self._file('chat.css', 'text/css; charset=utf-8')
+        if p == '/chat.js':
+            return self._file('chat.js', 'application/javascript; charset=utf-8')
+        if p in ('/console', '/tables'):
             return self._file('console.html', 'text/html; charset=utf-8')
         if p == '/style.css':
             return self._file('console.css', 'text/css; charset=utf-8')
         if p == '/app.js':
             return self._file('console.js', 'application/javascript; charset=utf-8')
+
+        # التحية الأولى كتابةٌ — فتسبق اتصال القراءة باتصال مؤسس
+        if p in ('/api/threads', '/api/messages'):
+            fc = db.connect('founder')
+            try:
+                chat.seed(fc)
+            finally:
+                fc.close()
 
         # كل قراءة تالية يفتحها اتصال **وكيل** — قراءة فقط، مفروضة
         con = db.connect('agent')
@@ -104,6 +123,12 @@ class Handler(BaseHTTPRequestHandler):
             if p == '/api/replies':
                 return self._send(200, {'replies': agents.REPLIES,
                                         'never_write_reply': agents.NEVER_WRITE_REPLY})
+            if p == '/api/threads':
+                return self._send(200, {'threads': chat.threads_meta(con)})
+            if p == '/api/messages':
+                th = qs.get('thread', ['head_of_ops'])[0]
+                since = int(qs.get('since', ['0'])[0])
+                return self._send(200, {'messages': chat.messages(con, th, since)})
             return self._send(404, {'error': f'لا نقطة بهذا المسار: {p}',
                                     'note': 'لا أخترع مسارًا غير معرَّف'})
         except Exception as e:                                    # noqa: BLE001
@@ -148,6 +173,24 @@ class Handler(BaseHTTPRequestHandler):
                 if not a:
                     return self._send(400, {'error': 'agent مطلوب'})
                 return self._send(200, engine.restore(con, a))
+            if p == '/api/chat':
+                th, text = body.get('thread'), (body.get('text') or '').strip()
+                if th not in chat.BY_ID:
+                    return self._send(400, {'error': f'محادثة غير معروفة: {th}'})
+                if not text:
+                    return self._send(400, {'error': 'اكتب شيئًا — أو اضغط زرًّا'})
+                uid = chat.post(con, th, 'user', 'text', {'text': text})
+                new = chat.handle(con, th, text)
+                return self._send(200, {'user_id': uid, 'messages': new})
+            if p == '/api/chat/action':
+                th, op = body.get('thread'), body.get('op')
+                if th not in chat.BY_ID:
+                    return self._send(400, {'error': f'محادثة غير معروفة: {th}'})
+                new = chat.apply_action(con, th, op,
+                                        id=body.get('id'),
+                                        reason=body.get('reason'),
+                                        agent=body.get('agent'))
+                return self._send(200, {'messages': new})
             return self._send(404, {'error': f'لا نقطة بهذا المسار: {p}'})
         except Exception as e:                                    # noqa: BLE001
             return self._send(500, {'error': str(e)})

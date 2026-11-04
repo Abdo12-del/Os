@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef1ff">
+<title>مركز العمليات — الدردشة</title>
+<link rel="stylesheet" href="/chat.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ جهات الاتصال ══ -->
+  <aside id="pane-threads">
+    <header class="grad">
+      <div class="me">
+        <span class="avatar founder">أ</span>
+        <div>
+          <h1>مركز العمليات</h1>
+          <p id="sub">…</p>
+        </div>
+      </div>
+      <a id="to-tables" href="/console" title="عرض الجداول الكاملة">▦</a>
+    </header>
+    <div id="threads" role="list"></div>
+    <footer class="foot-note">
+      كل رسالة هنا مسجّلة في تدقيق لا يُمحى · <a href="/console">الجداول</a>
+    </footer>
+  </aside>
+
+  <!-- ══ المحادثة ══ -->
+  <main id="pane-chat" class="hidden">
+    <header class="chat-head">
+      <button id="back" aria-label="رجوع">›</button>
+      <span class="avatar sm" id="head-av">🧭</span>
+      <div class="who">
+        <b id="head-name">…</b>
+        <span id="head-status">…</span>
+      </div>
+      <button id="revoke-btn" title="إيقاف / استئناف الوكيل">⛔</button>
+    </header>
+
+    <div id="msgs" aria-live="polite"></div>
+
+    <div id="chips"></div>
+    <form id="composer" autocomplete="off">
+      <input id="inp" placeholder="اكتب… «موافقة 12» · «رفض 12 السبب: …» · «الملخص»">
+      <button id="send" type="submit" aria-label="إرسال">➤</button>
+    </form>
+  </main>
+
+</div>
+<script src="/chat.js"></script>
+</body>
+</html>

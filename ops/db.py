@@ -140,6 +140,21 @@ CREATE TABLE IF NOT EXISTS agent_state (
 CREATE INDEX IF NOT EXISTS idx_pending_status ON pending_actions(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_ts       ON agent_audit_log(ts);
 CREATE INDEX IF NOT EXISTS idx_leads_reply    ON leads(first_reply_at);
+
+-- ── طبقة الدردشة: الواجهة messenger، لا لوحات ──
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread      TEXT NOT NULL,               -- وكيل = جهة اتصال
+    sender      TEXT NOT NULL,               -- user | agent | system
+    kind        TEXT NOT NULL,               -- text|brief|cases|proposal|result|...
+    payload     TEXT NOT NULL,               -- json
+    created_at  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS chat_state (
+    thread      TEXT PRIMARY KEY,
+    awaiting_reason_for INTEGER              -- رفض ينتظر سببه من المؤسس
+);
+CREATE INDEX IF NOT EXISTS idx_chat_thread ON chat_messages(thread, id);
 """
 
 
