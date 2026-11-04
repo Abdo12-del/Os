@@ -26,6 +26,7 @@ import agents
 import engine
 import memory
 import nlg
+import sem
 
 # ── جهات الاتصال ─────────────────────────────────────────────
 THREADS = [
@@ -384,6 +385,7 @@ HELP = ('أفهم هذه — ولا أدّعي غيرها:\n'
         '• قررت … — قرار يُبطِل ما قبله ويبقيه في التاريخ\n'
         '• ماذا تذكر عن …؟ / ماذا قررت؟ / لماذا رفضت؟\n'
         '• صدّر الذاكرة — اكتبها ملفًّا لتcommitها\n'
+        '• درّب الفهم — أعد بناء متجهات الكلمات من نصوصك\n'
         '• شغّل الوكلاء — يعمل الأربعة\n'
         '• الملخص — ملخص الصباح بأقسامه الثلاثة\n'
         '• المطابقة — حالات المال الست\n'
@@ -481,6 +483,14 @@ def handle(con, thread, text):
         return _since(con, before)
 
     # ٣.٥) الذاكرة — العقل الثاني
+    if re.search(r'(درب الفهم|اعد تدريب الفهم|تدريب الفهم)', t):
+        n = sem.build_vectors(REPO_ROOT)
+        m = sem.load_synonyms(REPO_ROOT)
+        _say(con, thread, f'درّبتُ الفهم على نصوص مستودعك: {n} متجه كلمة، '
+                          f'و{m} عنقود مترادفات من memory/synonyms.md.\n'
+                          'من الآن «ما يركز» تفهمها «فرط الحركة»، و«خبر التسويق» '
+                          'تفهمها «خبير التسويق».')
+        return _since(con, before)
     if re.search(r'(صدر الذاكره|تصدير الذاكره)', t):
         _do_export(con, thread)
         return _since(con, before)

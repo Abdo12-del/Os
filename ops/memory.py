@@ -22,6 +22,7 @@ import re
 import unicodedata
 
 import engine
+import sem
 
 KINDS = ('episode', 'fact', 'decision', 'promise', 'lesson')
 # الشيخوخة تختلف بالنوع: الحلقة تتقادم سريعًا، الحقيقة والمرجع ببطء
@@ -47,7 +48,12 @@ def _norm(s):
 
 
 def tokens(s):
-    return [t for t in _norm(s).split() if t not in STOP and len(t) > 1]
+    out = []
+    for w in _norm(s).split():
+        w = re.sub(r'[^\u0621-\u064A]', '', w)   # «الحركة؟» ← الحركة
+        if w and w not in STOP and len(w) > 1:
+            out.append(w)
+    return out
 
 
 # ── الكتابة ───────────────────────────────────────────────────
@@ -96,6 +102,10 @@ def recall(con, query, owner=None, kinds=None, k=5, include_invalid=False):
     q = tokens(query)
     if not q:
         return []
+    qx = sem.expand(q)                      # مترادفات + جيران + تحمل خطأ
+    qst = set()
+    for t in q:
+        qst |= sem.stem_candidates(t)       # الوجوه المورفولوجية
     sql = 'SELECT * FROM memories'
     wh, args = [], []
     if not include_invalid:
@@ -110,26 +120,35 @@ def recall(con, query, owner=None, kinds=None, k=5, include_invalid=False):
     rows = [dict(r) for r in con.execute(sql, args).fetchall()]
     if not rows:
         return []
-    docs = {r['id']: set(tokens(r['subject'] + ' ' + r['text'] + ' ' + r['tags']))
-            for r in rows}
+    docs, dstems = {}, {}
+    for r in rows:
+        dt = set(tokens(r['subject'] + ' ' + r['text'] + ' ' + r['tags']))
+        docs[r['id']] = dt
+        st = set()
+        for w in dt:
+            st |= sem.stem_candidates(w)
+        dstems[r['id']] = st
     df = {}
-    for t in set(q):
+    for t in qx:
         df[t] = sum(1 for d in docs.values() if t in d) or 10**9
     now = engine.NOW
     out = []
     for r in rows:
-        d = docs[r['id']]
-        matched = [t for t in q if t in d]
-        if not matched:
+        d, ds = docs[r['id']], dstems[r['id']]
+        exact = [t for t in q if t in d]              # لفظه حرفيًا
+        expnd = [t for t in qx - set(q) if t in d]    # فهمته الطبقة الدلالية
+        stm = qst & ds                                # وجه مورفولوجي مشترك
+        if not exact and not expnd and not stm:
             continue
-        rel = sum(1.0 / math.log(1 + df[t]) for t in matched) / len(q)
+        rel = (sum(1.0 / math.log(1 + df.get(t, 10**9)) for t in exact)
+               + .4 * len(expnd) + .5 * len(stm)) / len(q)
         try:
             age = (now - engine.datetime.fromisoformat(r['created_at'])).days
         except ValueError:
             age = 0
         rec = .5 ** (max(age, 0) / HALF_LIFE.get(r['kind'], 90))
         score = rel + .3 * rec + .4 * r['importance']
-        out.append({**r, 'score': round(score, 3), 'matched': matched,
+        out.append({**r, 'score': round(score, 3), 'matched': exact + expnd,
                     'age_days': age, 'kind_ar': KIND_AR[r['kind']]})
     out.sort(key=lambda x: -x['score'])
     return out[:k]

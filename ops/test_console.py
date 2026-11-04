@@ -437,6 +437,51 @@ def main():
     check('ملخص التشغيل فقرة لا قائمة', 'شغّلتُ' in txt and 'اقتراحًا' in txt,
           txt[:60])
 
+    # ── ١٦) الفهم الدلالي: تميّز الكلمة مهما اختلفت مفرداتها ──
+    print('\n[١٦] الفهم — مورفولوجيا + مترادفات مدرَّبة + متجهات نصوصه + ليفنشتاين')
+    import sem as _sem
+    _sem.load_synonyms('.')          # نفس الملفات في عملية الاختبار
+    check('Tashaphyne مدمج (linuxscout/tashaphyne)', _sem.HAS_TASHAPHYNE)
+    check('الجذر يوحّي الأشكال: يتحركون/الحركة',
+          bool(_sem.stem_candidates('يتحركون') & _sem.stem_candidates('الحركة')))
+    check('عنقود المترادفات محمّل من memory/synonyms.md',
+          len(_sem._CLUSTERS) >= 8, f'{len(_sem._CLUSTERS)} عنقودًا')
+    ex = _sem.expand(['يركز'], use_vectors=False)
+    check('«يركز» تفهمها «فرط الحركة» بلا نموذج عصبي',
+          {'فرط', 'الحركه'} <= ex, sorted(ex)[:6])
+
+    code, res = post('/api/chat', {'thread': 'head_of_ops', 'text': 'درّب الفهم'})
+    check('«درّب الفهم» تبني متجهات من نصوصه',
+          'متجه' in res['messages'][-1]['payload']['text'],
+          res['messages'][-1]['payload']['text'][:50])
+
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن ابن ما يركز؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    top = card[0]['payload']['items'][0]['subject'] if card else ''
+    check('«ابن ما يركّز» تسترجع درس فرط الحركة',
+          bool(card) and top in ('لا وعد بعلاج', 'الوجع الأول', 'الزاوية المعتمدة'),
+          top)
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن المحضورات؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    subs = [it['subject'] for m in card for it in m['payload']['items']]
+    check('«المحضورات» (خطأ إملائي) تفهمها «محظورات» بليفنشتاين ١',
+          any('محظورات' in x for x in subs), str(subs)[:40])
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن الحصة التجريبية؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    subs = [it['subject'] for m in card for it in m['payload']['items']]
+    check('«التجريبية» تسترجع حقيقة «الحصة التعريفية»',
+          any('التعريفية' in x for x in subs), str(subs)[:40])
+    code, res = post('/api/chat', {'thread': 'marketing',
+                                   'text': 'ماذا تذكر عن فرط الحركة؟'})
+    card = [m for m in res['messages'] if m['kind'] == 'memory']
+    items = card[0]['payload']['items'] if card else []
+    check('التوسيع يعيد الترتيب لكن أول نتيجة تحوي لفظك حرفيًا',
+          bool(items) and 'فرط' in (items[0].get('matched') or []),
+          str(items[0].get('matched') if items else None)[:40])
+
     # ── الحصيلة ──
     ok = sum(1 for _, o, _ in RESULTS if o)
     print('\n' + '=' * 68)

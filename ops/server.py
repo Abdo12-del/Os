@@ -23,6 +23,7 @@ import engine      # noqa: E402
 import agents      # noqa: E402
 import chat        # noqa: E402
 import memory      # noqa: E402
+import sem         # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)                 # جذر المستودع — مجلد memory/ فيه
@@ -34,6 +35,8 @@ _f = db.connect('founder')
 chat.init(_f)
 chat.seed(_f)
 memory.ensure(_f, ROOT)                      # التدريب من ملفات memory/*.md
+sem.load_synonyms(ROOT)                      # عنقود المترادفات
+sem.load_vectors()                           # متجهات مدرَّبة على نصوصه
 engine.ON_EVENT.append(memory.capture)       # كل رفض/تنفيذ يصير ذكرى
 _f.close()
 
